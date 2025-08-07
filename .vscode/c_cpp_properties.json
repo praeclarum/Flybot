@@ -1,0 +1,49 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/Users/fak/Library/Arduino15/packages/esp32/hardware/esp32/3.2.1/cores/esp32",
+                "/Users/fak/Library/Arduino15/packages/esp32/hardware/esp32/3.2.1/variants/esp32",
+                "/Users/fak/Library/Arduino15/packages/esp32/tools/esp-x32/2411/xtensa-esp-elf/include",
+                "/Users/fak/Library/Arduino15/packages/esp32/tools/esp-x32/2411/xtensa-esp-elf/include/c++/14.2.0",
+                "/Users/fak/Library/Arduino15/packages/esp32/tools/esp-x32/2411/xtensa-esp-elf/include/c++/14.2.0/xtensa-esp-elf",
+                "/Users/fak/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-858a988d-v1/esp32/include/esp_common/include",
+                "/Users/fak/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-858a988d-v1/esp32/include/esp_driver_gpio/include",
+                "/Users/fak/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-858a988d-v1/esp32/include/esp_driver_gptimer/include",
+                "/Users/fak/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-858a988d-v1/esp32/include/esp_hw_support/include",
+                "/Users/fak/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-858a988d-v1/esp32/include/esp_rom/esp32/include/esp32",
+                "/Users/fak/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-858a988d-v1/esp32/include/esp_rom/include",
+                "/Users/fak/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-858a988d-v1/esp32/include/esp_system/include",
+                "/Users/fak/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-858a988d-v1/esp32/include/esp_timer/include",
+                "/Users/fak/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-858a988d-v1/esp32/include/freertos/FreeRTOS-Kernel/include",
+                "/Users/fak/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-858a988d-v1/esp32/include/freertos/FreeRTOS-Kernel/portable/xtensa/include/freertos",
+                "/Users/fak/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-858a988d-v1/esp32/include/freertos/config/include",
+                "/Users/fak/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-858a988d-v1/esp32/include/freertos/config/include/freertos",
+                "/Users/fak/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-858a988d-v1/esp32/include/freertos/config/xtensa/include",
+                "/Users/fak/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-858a988d-v1/esp32/include/hal/include",
+                "/Users/fak/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-858a988d-v1/esp32/include/heap/include",
+                "/Users/fak/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-858a988d-v1/esp32/include/lwip/lwip/src/include",
+                "/Users/fak/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-858a988d-v1/esp32/include/lwip/port/esp32xx/include",
+                "/Users/fak/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-858a988d-v1/esp32/include/lwip/port/freertos/include",
+                "/Users/fak/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-858a988d-v1/esp32/include/lwip/port/include",
+                "/Users/fak/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-858a988d-v1/esp32/include/newlib/platform_include",
+                "/Users/fak/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-858a988d-v1/esp32/include/soc/esp32/include",
+                "/Users/fak/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-858a988d-v1/esp32/include/xtensa/esp32/include",
+                "/Users/fak/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-858a988d-v1/esp32/include/xtensa/include",
+                "/Users/fak/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-858a988d-v1/esp32/include/log/include",
+                "/Users/fak/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-858a988d-v1/esp32/qio_qspi/include",
+                "/Users/fak/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-858a988d-v1/esp32c3/include/riscv/include",
+                "/Users/fak/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-858a988d-v1/esp32c3/include/soc/esp32c3/include",
+                "/Users/fak/Library/Arduino15/packages/esp32/tools/esp32-arduino-libs/idf-release_v5.4-858a988d-v1/esp32c3/include/soc/esp32c3/register"
+            ],
+            "defines": [],
+            "compilerPath": "/opt/homebrew/opt/ccache/libexec/clang",
+            "cStandard": "c17",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "macos-clang-arm64"
+        }
+    ],
+    "version": 4
+}

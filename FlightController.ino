@@ -1,10 +1,13 @@
 #include <WiFi.h>
 #include <ESPmDNS.h>
 
+#include "Config.h"
 #include "OTA.h"
 
 const char *hostName = "FlightController";
 const char *serialNumber = "0000";
+
+Config config;
 
 void setup() {
     Serial.begin(115200);

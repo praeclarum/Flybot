@@ -5,6 +5,8 @@
 #include <vector>
 #include <cmath>
 
+#include "Config.h" // For MotorConfig
+
 using namespace std;
 
 struct ControlInput {
@@ -14,32 +16,26 @@ struct ControlInput {
     float yaw;
 };
 
-struct MotorConfig {
-    float x;      // X position relative to COM
-    float y;      // Y position relative to COM
-    int direction; // +1 for CW, -1 for CCW
-};
-
 class MotorMixer {
 private:
     size_t numMotors;
     vector<ControlInput> mixerMatrix;
 public:
-    MotorMixer(const vector<MotorConfig>& motors)
-        : numMotors(motors.size()), mixerMatrix(numMotors, ControlInput{}) {
-        assert(numMotors > 0);
+    MotorMixer()
+        : numMotors(config.numMotors.getInt()), mixerMatrix(numMotors, ControlInput{}) {
         // Build mixer matrix
         float maxX = 0, maxY = 0;
-        for (const auto& m : motors) {
-            if (std::abs(m.x) > maxX) maxX = std::abs(m.x);
-            if (std::abs(m.y) > maxY) maxY = std::abs(m.y);
+        const auto motors = config.getMotorConfigs();
+        for (const auto m : motors) {
+            if (abs(m->x.getFloat()) > maxX) maxX = abs(m->x.getFloat());
+            if (abs(m->y.getFloat()) > maxY) maxY = abs(m->y.getFloat());
         }
         for (size_t i = 0; i < numMotors; ++i) {
             // [thrust, pitch, roll, yaw]
             mixerMatrix[i].thrust = 1.0f; // All motors contribute equally to thrust
-            mixerMatrix[i].pitch  = motors[i].y / (maxY ? maxY : 1); // Pitch: y offset (rotation about X)
-            mixerMatrix[i].roll   = motors[i].x / (maxX ? maxX : 1); // Roll: x offset (rotation about Y)
-            mixerMatrix[i].yaw    = static_cast<float>(motors[i].direction); // Yaw: CW/CCW
+            mixerMatrix[i].pitch  = motors[i]->y.getFloat() / (maxY ? maxY : 1); // Pitch: y offset (rotation about X)
+            mixerMatrix[i].roll   = motors[i]->x.getFloat() / (maxX ? maxX : 1); // Roll: x offset (rotation about Y)
+            mixerMatrix[i].yaw    = static_cast<float>(motors[i]->direction.getInt()); // Yaw: CW/CCW
         }
     }
 
