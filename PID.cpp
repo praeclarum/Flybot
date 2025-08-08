@@ -1,16 +1,20 @@
 #include "PID.h"
 
 PID::PID(
-    const String &name,
+    const String &name, 
     float defaultKp, float defaultKi, float defaultKd,
-    float defaultILimit, float defaultLimit)
+    float defaultDFilter,
+    float defaultILimit, float defaultDLimit, float defaultLimit)
     : kp(name + ".kp", "Proportional gain", Value::fromFloat(defaultKp))
     , ki(name + ".ki", "Integral gain", Value::fromFloat(defaultKi))
     , kd(name + ".kd", "Derivative gain", Value::fromFloat(defaultKd))
+    , dfilter(name + ".dfilter", "Derivative term filter coefficient (0-1)", Value::fromFloat(defaultDFilter))
     , ilimit(name + ".ilimit", "Integral windup limit", Value::fromFloat(defaultILimit))
+    , dlimit(name + ".dlimit", "Derivative term limit", Value::fromFloat(defaultDLimit))
     , limit(name + ".limit", "Output limit", Value::fromFloat(defaultLimit))
     , errorIntegral(0.0f)
     , lastError(0.0f)
+    , lastDTerm(0.0f)
     , updateCount(0)
     , lastUpdateMicros(0)
     , lastOutput(0.0f) {
@@ -48,8 +52,22 @@ float PID::updateError(float error) {
     }
     float iTerm = ki.getFloat() * errorIntegral;
 
-    // Derivative term
-    float dTerm = kd.getFloat() * (error - lastError) / dt;
+    // Derivative term with filtering and limiting
+    float rawDTerm = kd.getFloat() * (error - lastError) / dt;
+    float filterCoeff = dfilter.getFloat();
+    if (filterCoeff < 0.0f) filterCoeff = 0.0f;
+    if (filterCoeff > 1.0f) filterCoeff = 1.0f;
+    float dTerm = lastDTerm + filterCoeff * (rawDTerm - lastDTerm);
+    
+    // Apply D-term limiting
+    float dLimitValue = dlimit.getFloat();
+    if (dTerm > dLimitValue) {
+        dTerm = dLimitValue;
+    } else if (dTerm < -dLimitValue) {
+        dTerm = -dLimitValue;
+    }
+    
+    lastDTerm = dTerm;
     lastError = error;
 
     // Combine terms using negative feedback
@@ -70,10 +88,11 @@ void PID::resetErrorIntegral() {
 }
 
 TrackingPID::TrackingPID(
-    const String &name,
-    float defaultKp, float defaultKi, float defaultKd,
-    float defaultILimit, float defaultLimit)
-    : PID(name, defaultKp, defaultKi, defaultKd, defaultILimit, defaultLimit)
+    const String &name, 
+        float defaultKp, float defaultKi, float defaultKd,
+        float defaultDFilter,
+        float defaultILimit, float defaultDLimit, float defaultLimit)
+    : PID(name, defaultKp, defaultKi, defaultKd, defaultDFilter, defaultILimit, defaultDLimit, defaultLimit)
     , target(0.0f)
     , position(0.0f) {
 }
