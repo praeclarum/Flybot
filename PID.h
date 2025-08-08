@@ -38,7 +38,8 @@ class TrackingPID : public PID {
     float target;
     float position;
 public:
-    TrackingPID(const String &name, 
+    TrackingPID(
+        const String &name, 
         float defaultKp, float defaultKi, float defaultKd,
         float defaultDFilter,
         float defaultILimit, float defaultDLimit, float defaultLimit);
