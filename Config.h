@@ -27,6 +27,8 @@ public:
     MotorConfig motor5;
     MotorConfig motor6;
     MotorConfig motor7;
+    ConfigValue comX;
+    ConfigValue comY;
 
     Config()
         : numMotors("numMotors", "The number of motors on this airframe", Value::fromInt(4))
@@ -38,6 +40,8 @@ public:
         , motor5(5)
         , motor6(6)
         , motor7(7)
+        , comX("com.x", "The X position of the center of mass", Value::fromFloat(0.0f))
+        , comY("com.y", "The Y position of the center of mass", Value::fromFloat(0.0f))
         {
     }
 

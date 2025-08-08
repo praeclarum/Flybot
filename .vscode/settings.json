@@ -2,6 +2,9 @@
     "files.associations": {
         "cmath": "cpp",
         "vector": "cpp",
-        "cstdint": "cpp"
+        "cstdint": "cpp",
+        "__split_buffer": "cpp",
+        "string": "cpp",
+        "deque": "cpp"
     }
 }
