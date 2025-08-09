@@ -58,7 +58,7 @@ void controlLoop(MPU &mpu) {
     Vector orientEuler = currentOrientation.toEulerAngles();
     Vector errorEuler = qError.toEulerAngles();
 
-    Serial.printf("%.3f,%.3f,%.3f\n", orientEuler.x * rad2deg, pitchCommandDeg, errorEuler.x * rad2deg);
+    // Serial.printf("%.3f,%.3f,%.3f\n", orientEuler.x * rad2deg, pitchCommandDeg, errorEuler.x * rad2deg);
 
     loopCounter++;
 }

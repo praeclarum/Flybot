@@ -14,6 +14,9 @@ const char *serialNumber = "0000";
 MPU6050 mpu;
 AirframeConfig airframeConfig;
 
+void controlLoop(MPU &mpu);
+void webServerBegin();
+
 void setup() {
     Serial.begin(115200);
     Serial.println();
@@ -38,9 +41,10 @@ void setup() {
 
     Wire.begin();
     mpu.begin();
+
+    webServerBegin();
 }
 
-void controlLoop(MPU &mpu);
 
 void loop() {
     otaLoop();
