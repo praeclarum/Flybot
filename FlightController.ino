@@ -3,9 +3,17 @@
 
 #include "Config.h"
 #include "OTA.h"
+#include "MPU6050.h"
 
 const char *hostName = "FlightController";
 const char *serialNumber = "0000";
+
+#define CONTROL_LOOP_HZ 1
+#define CONTROL_LOOP_INTERVAL_MICROS (1000000 / CONTROL_LOOP_HZ)
+
+MPU6050 mpu6050;
+
+unsigned long lastControlLoopMicros = 0;
 
 AirframeConfig airframeConfig;
 
@@ -30,8 +38,24 @@ void setup() {
     otaSetup(hostName);
 
     Serial.println("================================");
+
+    Wire.begin();
+    mpu6050.begin();
+
+    lastControlLoopMicros = micros();
 }
+
 
 void loop() {
     otaLoop();
+    unsigned long now = micros();
+    if (now - lastControlLoopMicros >= CONTROL_LOOP_INTERVAL_MICROS) {
+        lastControlLoopMicros = now;
+
+        // Read sensor data
+        const auto mpuData = mpu6050.readData();
+        Serial.printf("Accel: X=%.2f, Y=%.2f, Z=%.2f | Gyro: X=%.2f, Y=%.2f, Z=%.2f\n",
+                      mpuData.accelX, mpuData.accelY, mpuData.accelZ,
+                      mpuData.gyroX, mpuData.gyroY, mpuData.gyroZ);
+    }
 }
