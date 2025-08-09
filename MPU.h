@@ -15,6 +15,23 @@ struct MPUData {
           gyroX(0.0f), gyroY(0.0f), gyroZ(0.0f) {}
 };
 
+struct Quaternion {
+    float w, x, y, z;
+
+    Quaternion(float w = 1.0f, float x = 0.0f, float y = 0.0f, float z = 0.0f)
+        : w(w), x(x), y(y), z(z) {}
+
+    void normalize() {
+        float norm = sqrtf(w * w + x * x + y * y + z * z);
+        if (norm > 0.0f) {
+            w /= norm;
+            x /= norm;
+            y /= norm;
+            z /= norm;
+        }
+    }
+};
+
 class LinearCal {
     ConfigValue scale;
     ConfigValue offset;
@@ -45,6 +62,8 @@ class MPU {
     bool isCalibrating;
     uint32_t calCount;
     MPUData calData;
+
+    Quaternion orientation;
 protected:
     virtual MPUData readUncalibrated() = 0;
 public:
@@ -52,6 +71,10 @@ public:
     virtual ~MPU() {}
     virtual void begin() = 0;
     MPUData read();
+
+    Quaternion getOrientation() const {
+        return orientation;
+    }
 
     void beginCalibration();
     void endCalibration();

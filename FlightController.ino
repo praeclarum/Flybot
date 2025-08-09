@@ -71,7 +71,7 @@ void loop() {
         // Read sensor data
         const auto mpuData = mpu6050.read();
         // Serial.printf("%f,%f,%f\n", mpuData.accelX, mpuData.accelY, mpuData.accelZ);
-        Serial.printf("%f,%f,%f\n", mpuData.gyroX, mpuData.gyroY, mpuData.gyroZ);
+        // Serial.printf("%f,%f,%f\n", mpuData.gyroX, mpuData.gyroY, mpuData.gyroZ);
         // Serial.println(dtMicros);
         
         loopCounter++;
