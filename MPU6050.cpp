@@ -9,11 +9,13 @@
 #define MPU6050_ACCEL_CONFIG	0x1C
 #define MPU6050_PWR_MGMT_1      0x6B
 
+#define PI 3.14159265358979323846f
+
 void MPU6050::begin() {
 	writeReg(MPU6050_SMPLRT_DIV, 0x00);
 	writeReg(MPU6050_CONFIG, 0x00);
-	writeReg(MPU6050_GYRO_CONFIG, 0x08);
-	writeReg(MPU6050_ACCEL_CONFIG, 0x00);
+	writeReg(MPU6050_GYRO_CONFIG, 0x08); // +/- 500 degrees/sec
+	writeReg(MPU6050_ACCEL_CONFIG, 0x00); // +/-2g range
 	writeReg(MPU6050_PWR_MGMT_1, 0x01);
 }
 
@@ -44,15 +46,15 @@ MPUData MPU6050::readData() {
 float MPU6050::readGyro(uint8_t axis) {
     uint8_t highByte = i2c.read();
     uint8_t lowByte = i2c.read();
-    int16_t rawValue = (highByte << 8) | lowByte;
-    return static_cast<float>(rawValue) / 131.0f; // Convert to degrees per second
+    uint16_t rawValue = ((uint16_t)highByte << 8) | lowByte;
+    return static_cast<float>((int16_t)rawValue) * (PI / 180.0f / 65.5f);
 }
 
 float MPU6050::readAccel(uint8_t axis) {
     uint8_t highByte = i2c.read();
     uint8_t lowByte = i2c.read();
-    int16_t rawValue = (highByte << 8) | lowByte;
-    return static_cast<float>(rawValue) / 16384.0f; // Convert to g's
+    uint16_t rawValue = ((uint16_t)highByte << 8) | lowByte;
+    return static_cast<float>((int16_t)rawValue) / 16384.0f; // Convert to g's
 }
 
 void MPU6050::writeReg(uint8_t registerAddress, uint8_t data) {

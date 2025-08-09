@@ -8,7 +8,7 @@
 const char *hostName = "FlightController";
 const char *serialNumber = "0000";
 
-#define CONTROL_LOOP_HZ 1
+#define CONTROL_LOOP_HZ 10
 #define CONTROL_LOOP_INTERVAL_MICROS (1000000 / CONTROL_LOOP_HZ)
 
 MPU6050 mpu6050;
@@ -54,8 +54,7 @@ void loop() {
 
         // Read sensor data
         const auto mpuData = mpu6050.readData();
-        Serial.printf("Accel: X=%.2f, Y=%.2f, Z=%.2f | Gyro: X=%.2f, Y=%.2f, Z=%.2f\n",
-                      mpuData.accelX, mpuData.accelY, mpuData.accelZ,
-                      mpuData.gyroX, mpuData.gyroY, mpuData.gyroZ);
+        // Serial.printf("%f,%f,%f\n", mpuData.accelX, mpuData.accelY, mpuData.accelZ);
+        Serial.printf("%f,%f,%f\n", mpuData.gyroX, mpuData.gyroY, mpuData.gyroZ);
     }
 }
