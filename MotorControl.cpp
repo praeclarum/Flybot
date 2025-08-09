@@ -22,10 +22,10 @@ private:
     vector<ControlInput> mixerMatrix;
 public:
     MotorMixer()
-        : numMotors(config.numMotors.getInt()), mixerMatrix(numMotors, ControlInput{}) {
+        : numMotors(airframeConfig.numMotors.getInt()), mixerMatrix(numMotors, ControlInput{}) {
         // Build mixer matrix
         float maxX = 0, maxY = 0;
-        const auto motors = config.getMotorConfigs();
+        const auto motors = airframeConfig.getMotorConfigs();
         for (const auto m : motors) {
             if (abs(m->x.getFloat()) > maxX) maxX = abs(m->x.getFloat());
             if (abs(m->y.getFloat()) > maxY) maxY = abs(m->y.getFloat());

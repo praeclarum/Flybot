@@ -7,7 +7,7 @@
 const char *hostName = "FlightController";
 const char *serialNumber = "0000";
 
-Config config;
+AirframeConfig airframeConfig;
 
 void setup() {
     Serial.begin(115200);

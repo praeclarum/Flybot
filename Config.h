@@ -18,7 +18,7 @@ public:
     }
 };
 
-class Config {
+class AirframeConfig {
 public:
     ConfigValue numMotors;
     MotorConfig motor0;
@@ -32,7 +32,7 @@ public:
     ConfigValue comX;
     ConfigValue comY;
 
-    Config()
+    AirframeConfig()
         : numMotors("numMotors", "The number of motors on this airframe", Value::fromInt(4))
         , motor0(0)
         , motor1(1)
@@ -76,4 +76,4 @@ public:
     }
 };
 
-extern Config config;
+extern AirframeConfig airframeConfig;
