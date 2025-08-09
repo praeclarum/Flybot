@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include <WiFi.h>
 #include <ESPmDNS.h>
 
@@ -12,7 +14,9 @@ const char *serialNumber = "0000";
 #define CONTROL_LOOP_HZ 100
 #define CONTROL_LOOP_INTERVAL_MICROS (1000000 / CONTROL_LOOP_HZ)
 
-MPU6050 mpu6050;
+using namespace std;
+
+MPU6050 mpu;
 
 unsigned long lastControlLoopMicros = 0;
 unsigned long nextControlLoopMicros = 0;
@@ -42,25 +46,9 @@ void setup() {
     Serial.println("================================");
 
     Wire.begin();
-    mpu6050.begin();
+    mpu.begin();
 
     lastControlLoopMicros = micros();
-
-    Quaternion::testQEuler(0.0f, 0.0f, 0.0f);
-    Quaternion::testQEuler(0.0f, 0.0f, 1.5707963267948966f); // 90 degrees around Y-axis
-    Quaternion::testQEuler(0.0f, 1.5707963267948966f, 0.0f); // 90 degrees around X-axis
-    Quaternion::testQEuler(1.5707963267948966f, 0.0f, 0.0f); // 90 degrees around Z-axis
-    Quaternion::testQEuler(0.0f, 1.5707963267948966f, 1.5707963267948966f); // 90 degrees around Y and Z
-    Quaternion::testQEuler(1.5707963267948966f, 0.0f, 1.5707963267948966f); // 90 degrees around X and Z
-    Quaternion::testQEuler(1.5707963267948966f, 1.5707963267948966f, 0.0f); // 90 degrees around X and Y
-    Quaternion::testQEuler(1.5707963267948966f, 1.5707963267948966f, 1.5707963267948966f); // 90 degrees around all axes
-    Quaternion::testQEuler(0.0f, -1.5707963267948966f, 0.0f);   // -90 degrees around Y-axis
-    Quaternion::testQEuler(-1.5707963267948966f, 0.0f, 0.0f);   // -90 degrees around X-axis
-    Quaternion::testQEuler(0.0f, 0.0f, -1.5707963267948966f);   // -90 degrees around Z-axis
-    Quaternion::testQEuler(0.0f, -1.5707963267948966f, -1.5707963267948966f); // -90 degrees around Y and Z
-    Quaternion::testQEuler(-1.5707963267948966f, 0.0f, -1.5707963267948966f); // -90 degrees around X and Z
-    Quaternion::testQEuler(-1.5707963267948966f, -1.5707963267948966f, 0.0f); // -90 degrees around X and Y
-    Quaternion::testQEuler(-1.5707963267948966f, -1.5707963267948966f, -1.5707963267948966f); // -90 degrees around all axes
 }
 
 const int numCalCount = 300;
@@ -78,18 +66,23 @@ void loop() {
 
         if (loopCounter == 0) {
             Serial.println("Starting calibration...");
-            mpu6050.beginCalibration();
+            mpu.beginCalibration();
         }
         else if (loopCounter == numCalCount) {
             Serial.println("Calibration complete.");
-            mpu6050.endCalibration();
+            mpu.endCalibration();
         }
 
         // Read sensor data
-        const auto mpuData = mpu6050.read();
+        // const auto mpuData = mpu6050.read();
         // Serial.printf("%f,%f,%f\n", mpuData.accelX, mpuData.accelY, mpuData.accelZ);
         // Serial.printf("%f,%f,%f\n", mpuData.gyroX, mpuData.gyroY, mpuData.gyroZ);
         // Serial.println(dtMicros);
+        mpu.update();
+        const float pi = std::acos(-1.0f);
+        const auto orientation = mpu.getOrientation();
+        const auto euler = orientation.toEulerAngles();
+        Serial.printf("%.3f,%.3f,%.3f\n", euler.x * 180.0f / pi, euler.y * 180.0f / pi, euler.z * 180.0f / pi);
         
         loopCounter++;
         lastControlLoopMicros = nowMicros;

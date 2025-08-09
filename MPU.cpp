@@ -11,7 +11,7 @@ MPU::MPU()
 {
 }
 
-MPUData MPU::read()
+MPUData MPU::readCalibrated()
 {
     auto data = readUncalibrated();
     if (isCalibrating) {
@@ -136,4 +136,18 @@ static Quaternion madgwickUpdate(float deltat, const MPUData &data, const Quater
     SEq_4 /= norm;
 
     return Quaternion(SEq_1, SEq_2, SEq_3, SEq_4);
+}
+
+void MPU::update()
+{
+    const auto nowMicros = micros();
+    if (updateCount == 0) {
+        orientation = Quaternion();
+    } else {
+        const auto data = readCalibrated();
+        const float dt = (nowMicros - lastUpdateMicros) * 1e-6f;
+        orientation = madgwickUpdate(dt, data, orientation, 0.1f);
+    }
+    lastUpdateMicros = nowMicros;
+    updateCount++;
 }

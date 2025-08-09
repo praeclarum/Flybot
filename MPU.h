@@ -48,13 +48,20 @@ class MPU {
     MPUData calData;
 
     Quaternion orientation;
+    
+    uint32_t updateCount;
+    unsigned long lastUpdateMicros;
+    MPUData readCalibrated();
+
 protected:
     virtual MPUData readUncalibrated() = 0;
+
 public:
     MPU();
     virtual ~MPU() {}
     virtual void begin() = 0;
-    MPUData read();
+
+    void update();
 
     Quaternion getOrientation() const {
         return orientation;
