@@ -36,6 +36,21 @@ struct Quaternion {
         }
     }
 
+    // Quaternion multiplication (Hamilton product)
+    Quaternion operator*(const Quaternion& rhs) const {
+        return Quaternion(
+            w * rhs.w - x * rhs.x - y * rhs.y - z * rhs.z,
+            w * rhs.x + x * rhs.w + y * rhs.z - z * rhs.y,
+            w * rhs.y - x * rhs.z + y * rhs.w + z * rhs.x,
+            w * rhs.z + x * rhs.y - y * rhs.x + z * rhs.w
+        );
+    }
+
+    // Quaternion inverse (for unit quaternions, just conjugate)
+    Quaternion inverse() const {
+        return Quaternion(w, -x, -y, -z);
+    }
+
     Vector toEulerAngles() const {
         const float sinx = 2.0f * (w * x + y * z);
         const float cosx = 1.0f - 2.0f * (x * x + y * y);
