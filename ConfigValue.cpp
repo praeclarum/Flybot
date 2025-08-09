@@ -38,5 +38,6 @@ void ConfigValue::setValue(const Value &newValue) {
         ESP_LOGW("Config", "Attempt to set value of type %d, expected %d", newValue.getType(), defaultValue.getType());
         return;
     }
+    ESP_LOGI("Config", "Setting %s to %s", name.c_str(), newValue.toString().c_str());
     value = newValue;
 }

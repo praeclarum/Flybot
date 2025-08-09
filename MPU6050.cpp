@@ -19,7 +19,7 @@ void MPU6050::begin() {
 	writeReg(MPU6050_PWR_MGMT_1, 0x01);
 }
 
-MPUData MPU6050::readData() {
+MPUData MPU6050::readUncalibrated() {
     MPUData data;
 
     // Read gyroscope data
