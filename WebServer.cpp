@@ -3,6 +3,8 @@
 
 #include <algorithm>
 
+#include "State.h"
+
 using namespace std;
 
 static AsyncWebServer server(80);
@@ -49,37 +51,42 @@ let state = {
     armed: false,
 };
 
+const rad2deg = 180 / Math.PI;
+
 //
 // COMMUNICATIONS
 //
-var ws = new WebSocket('ws://flightcontroller.local/ws');
+let ws = new WebSocket('ws://flightcontroller.local/ws');
+let wsConnected = false;
 ws.onopen = function() {
     console.log("WebSocket connected");
+    wsConnected = true;
 };
 ws.onmessage = function(event) {
-    var data = JSON.parse(event.data);
-    console.log("WebSocket message: ", data);
+    const data = JSON.parse(event.data);
     if (data.type === "state") {
-        state.rollDegrees = data.rd;
-        state.pitchDegrees = data.pd;
-        state.yawDegrees = data.yd;
+        state.rollDegrees = data.rd * rad2deg;
+        state.pitchDegrees = data.pd * rad2deg;
+        state.yawDegrees = data.yd * rad2deg;
         state.throttlePercent = data.th;
         state.armed = data.a;
         drawAll();
     }
 };
 ws.onclose = function() {
+    wsConnected = false;
     console.log("WebSocket closed");
 };
 ws.onerror = function(error) {
     console.log("WebSocket error: " + error);
 };
 function sendCommand() {
-    var command = document.getElementById("command").value;
+    if (!wsConnected) return;
+    const command = document.getElementById("command").value;
     ws.send("command " + command);
-    console.log("WebSocket sent: " + command);
 }
 function getState() {
+    if (!wsConnected) return;
     ws.send("state");
 }
 
@@ -107,7 +114,15 @@ function drawHUD() {
     ctx.fillText("Armed: " + (state.armed ? "Yes" : "No"), 10, 100);
 }
 
-drawAll();
+function startUI() {
+    // Initial draw
+    drawAll();
+    // Update state at 2Hz
+    setInterval(() => {
+        getState();
+    }, 1000/2);
+}
+startUI();
 )";
 static const size_t jsContentLength = strlen_P(jsContent);
 
@@ -159,7 +174,12 @@ void webServerBegin() {
     });
     wsHandler.onMessage([](AsyncWebSocket *server, AsyncWebSocketClient *client, const uint8_t *data, size_t len) {
         if (strncmp((const char *)data, "state", min((size_t)5, len)) == 0) {
-            String stateData = "{\"type\":\"state\",\"rd\":0.0,\"pd\":0.0,\"yd\":0.0,\"th\":0.0,\"a\":false}";
+            const State &state = getState();
+            String stateData = "{\"type\":\"state\",\"rd\":" + String(state.rollRadians)
+                + ",\"pd\":" + String(state.pitchRadians, 3)
+                + ",\"yd\":" + String(state.yawRadians, 3)
+                + ",\"th\":" + String(state.throttle, 3)
+                + ",\"a\":" + String(state.armed?"true":"false") + "}";
             server->text(client->id(), stateData);
             return;
         }

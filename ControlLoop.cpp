@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "Geometry.h"
 #include "MPU.h"
+#include "State.h"
 
 #define CONTROL_LOOP_HZ 100
 #define CONTROL_LOOP_INTERVAL_MICROS (1000000 / CONTROL_LOOP_HZ)
@@ -57,6 +58,8 @@ void controlLoop(MPU &mpu) {
     Quaternion qError = getOrientationError(currentOrientation, qCmd);
     Vector orientEuler = currentOrientation.toEulerAngles();
     Vector errorEuler = qError.toEulerAngles();
+
+    stateUpdateOrientation(orientEuler.x, orientEuler.y, orientEuler.z);
 
     // Serial.printf("%.3f,%.3f,%.3f\n", orientEuler.x * rad2deg, pitchCommandDeg, errorEuler.x * rad2deg);
 
