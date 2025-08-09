@@ -4,6 +4,7 @@
 #include "Config.h"
 #include "OTA.h"
 #include "MPU6050.h"
+#include "Geometry.h"
 
 const char *hostName = "FlightController";
 const char *serialNumber = "0000";
@@ -44,6 +45,22 @@ void setup() {
     mpu6050.begin();
 
     lastControlLoopMicros = micros();
+
+    Quaternion::testQEuler(0.0f, 0.0f, 0.0f);
+    Quaternion::testQEuler(0.0f, 0.0f, 1.5707963267948966f); // 90 degrees around Y-axis
+    Quaternion::testQEuler(0.0f, 1.5707963267948966f, 0.0f); // 90 degrees around X-axis
+    Quaternion::testQEuler(1.5707963267948966f, 0.0f, 0.0f); // 90 degrees around Z-axis
+    Quaternion::testQEuler(0.0f, 1.5707963267948966f, 1.5707963267948966f); // 90 degrees around Y and Z
+    Quaternion::testQEuler(1.5707963267948966f, 0.0f, 1.5707963267948966f); // 90 degrees around X and Z
+    Quaternion::testQEuler(1.5707963267948966f, 1.5707963267948966f, 0.0f); // 90 degrees around X and Y
+    Quaternion::testQEuler(1.5707963267948966f, 1.5707963267948966f, 1.5707963267948966f); // 90 degrees around all axes
+    Quaternion::testQEuler(0.0f, -1.5707963267948966f, 0.0f);   // -90 degrees around Y-axis
+    Quaternion::testQEuler(-1.5707963267948966f, 0.0f, 0.0f);   // -90 degrees around X-axis
+    Quaternion::testQEuler(0.0f, 0.0f, -1.5707963267948966f);   // -90 degrees around Z-axis
+    Quaternion::testQEuler(0.0f, -1.5707963267948966f, -1.5707963267948966f); // -90 degrees around Y and Z
+    Quaternion::testQEuler(-1.5707963267948966f, 0.0f, -1.5707963267948966f); // -90 degrees around X and Z
+    Quaternion::testQEuler(-1.5707963267948966f, -1.5707963267948966f, 0.0f); // -90 degrees around X and Y
+    Quaternion::testQEuler(-1.5707963267948966f, -1.5707963267948966f, -1.5707963267948966f); // -90 degrees around all axes
 }
 
 const int numCalCount = 300;

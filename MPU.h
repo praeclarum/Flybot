@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ConfigValue.h"
+#include "Geometry.h"
 
 struct MPUData {
     float accelX; // Acceleration in g's
@@ -13,23 +14,6 @@ struct MPUData {
     MPUData()
         : accelX(0.0f), accelY(0.0f), accelZ(0.0f),
           gyroX(0.0f), gyroY(0.0f), gyroZ(0.0f) {}
-};
-
-struct Quaternion {
-    float w, x, y, z;
-
-    Quaternion(float w = 1.0f, float x = 0.0f, float y = 0.0f, float z = 0.0f)
-        : w(w), x(x), y(y), z(z) {}
-
-    void normalize() {
-        float norm = sqrtf(w * w + x * x + y * y + z * z);
-        if (norm > 0.0f) {
-            w /= norm;
-            x /= norm;
-            y /= norm;
-            z /= norm;
-        }
-    }
 };
 
 class LinearCal {
