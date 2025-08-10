@@ -7,6 +7,7 @@
 #include "OTA.h"
 #include "MPU6050.h"
 #include "Geometry.h"
+#include "RadioController.h"
 
 const char *hostName = "FlightController";
 const char *serialNumber = "0000";
@@ -41,12 +42,13 @@ void setup() {
 
     Wire.begin();
     mpu.begin();
+    rcBegin();
 
     webServerBegin();
 }
 
-
 void loop() {
     otaLoop();
+    rcUpdate();
     controlLoop(mpu);
 }
