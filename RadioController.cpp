@@ -10,8 +10,8 @@ HardwareSerial *serial = 0;
 static uint8_t packet[25] = {0};
 static uint8_t packetLen = 0;
 
-ConfigValue rcPitchMaxDegrees("rc.pitch.max", "Maximum pitch angle (degrees)", Value::fromFloat(60.0f));
-ConfigValue rcRollMaxDegrees("rc.roll.max", "Maximum roll angle (degrees)", Value::fromFloat(60.0f));
+ConfigValue rcPitchMaxDegrees("rc.pitch.max", "Maximum pitch angle (degrees)", Value::fromFloat(45.0f));
+ConfigValue rcRollMaxDegrees("rc.roll.max", "Maximum roll angle (degrees)", Value::fromFloat(45.0f));
 
 static void parsePacket() {
     bool failSafe = (packet[23] & 0x08) != 0; // True when no RC signal
