@@ -51,10 +51,10 @@ class MPU {
     
     uint32_t updateCount;
     unsigned long lastUpdateMicros;
-    MPUData readCalibrated();
+    bool readCalibrated(MPUData &data);
 
 protected:
-    virtual MPUData readUncalibrated() = 0;
+    virtual bool readUncalibrated(MPUData &data) = 0;
 
 public:
     MPU();

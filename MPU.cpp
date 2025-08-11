@@ -11,9 +11,11 @@ MPU::MPU()
 {
 }
 
-MPUData MPU::readCalibrated()
+bool MPU::readCalibrated(MPUData &data)
 {
-    auto data = readUncalibrated();
+    if (!readUncalibrated(data)) {
+        return false;
+    }
     if (isCalibrating) {
         calData.accelX += data.accelX;
         calData.accelY += data.accelY;
@@ -29,14 +31,14 @@ MPUData MPU::readCalibrated()
     data.gyroX = gyroXCal.apply(data.gyroX);
     data.gyroY = gyroYCal.apply(data.gyroY);
     data.gyroZ = gyroZCal.apply(data.gyroZ);
-    return data;
+    return true;
 }
 
 void MPU::beginCalibration()
 {
     isCalibrating = true;
-    calData = readUncalibrated();
-    calCount = 1;
+    calData = MPUData();
+    calCount = 0;
 }
 
 void MPU::endCalibration()
@@ -144,7 +146,10 @@ void MPU::update()
     if (updateCount == 0) {
         orientation = Quaternion();
     } else {
-        const auto data = readCalibrated();
+        MPUData data;
+        if (!readCalibrated(data)) {
+            return;
+        }
         const float dt = (nowMicros - lastUpdateMicros) * 1e-6f;
         orientation = madgwickUpdate(dt, data, orientation, 0.1f);
     }

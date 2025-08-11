@@ -48,7 +48,7 @@ class FlySocket {
         if (this.wsConnected) {
             this.ws.send(message);
         } else {
-            console.log("WebSocket not connected, cannot send message: " + message);
+            console.error("WebSocket not connected, cannot send message: " + message);
         }
     }
 }
@@ -75,6 +75,8 @@ function drawAll() {
 }
 
 function drawHUD(ctx, x, y, width, height) {
+    ctx.font = "16px sans-serif";
+
     const cx = x + width / 2;
     const cy = y + height / 2;
     ctx.clearRect(0, 0, width, height);
@@ -132,10 +134,87 @@ function drawHUD(ctx, x, y, width, height) {
 
     ctx.restore();
 
+    // Draw the yaw indicator
+    const yawHeight = height * 0.1;
+    const yawPxPerDeg = (width / 2) / 45;
+    // yaw_x = yawPxPerDeg * deg + yawOffset
+    // cx = yawPxPerDeg * yawDegrees + yawOffset
+    const yawCompass = -state.yawDegrees;
+    const yawOffset = cx - (yawCompass * yawPxPerDeg);
+    const yawMinDeg = Math.floor((yawCompass - 110) / 10) * 10;
+    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+    ctx.fillRect(0, 0, width, yawHeight);
+    for (let i = yawMinDeg; i <= yawMinDeg + 220; i += 2) {
+        const yawX = yawPxPerDeg * i + yawOffset;
+        const dist = Math.abs(i - yawCompass);
+        const alpha = 1.0 - Math.max(0.0, Math.min(1.0, dist / 45));
+        ctx.strokeStyle = "rgba(255, 255, 255, " + alpha + ")";
+        ctx.fillStyle = "rgba(255, 255, 255, " + alpha + ")";
+        ctx.lineWidth = (i % 10 === 0) ? 3 : 2;
+        ctx.beginPath();
+        ctx.moveTo(yawX, 0);
+        ctx.lineTo(yawX, (i % 10 === 0) ? 12 : 6);
+        ctx.stroke();
+        if (i % 10 === 0) {
+            let displayI = i;
+            while (displayI < 0) {
+                displayI += 360;
+            }
+            while (displayI >= 360) {
+                displayI -= 360;
+            }
+            let text = displayI + "°";
+            if (displayI === 0 || displayI === 360) {
+                text = "N";
+            }
+            else if (displayI === 45) {
+                text = "NE";
+            }
+            else if (displayI === 90) {
+                text = "E";
+            }
+            else if (displayI === 135) {
+                text = "SE";
+            }
+            else if (displayI === 180) {
+                text = "S";
+            }
+            else if (displayI === 225) {
+                text = "SW";
+            }
+            else if (displayI === 270) {
+                text = "W";
+            }
+            else if (displayI === 315) {
+                text = "NW";
+            }
+            const textWidth = ctx.measureText(text).width;
+            ctx.fillText(text, yawX - textWidth / 2, yawHeight - 5);
+        }
+    }
+    let displayI = yawCompass;
+    while (displayI < 0) {
+        displayI += 360;
+    }
+    while (displayI >= 360) {
+        displayI -= 360;
+    }
+    const yawText = displayI.toFixed(0) + "°";
+    const yawTextWidth = ctx.measureText(yawText).width;
+    ctx.fillStyle = "rgba(0, 0, 0, 1.0)";
+    ctx.fillRect(cx - yawTextWidth / 2 - 5, yawHeight - 20, yawTextWidth + 10, 20);
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillText(yawText, cx - yawTextWidth / 2, yawHeight - 5);
+    ctx.strokeStyle = "rgba(255, 255, 255, 1)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x, yawHeight);
+    ctx.lineTo(x + width, yawHeight);
+    ctx.stroke();
+
     ctx.fillStyle = "#000000";
-    ctx.font = "16px Arial";
-    ctx.fillText("Roll: " + state.rollDegrees.toFixed(1) + "°", 10, 40);
-    ctx.fillText("Yaw: " + state.yawDegrees.toFixed(1) + "°", 10, 60);
+    ctx.font = "16px sans-serif";
+    ctx.fillText("Roll: " + state.rollDegrees.toFixed(1) + "°", 10, 60);
     ctx.fillText("Throttle: " + state.throttlePercent.toFixed(1) + "%", 10, 80);
     ctx.fillText("Armed: " + (state.armed ? "Yes" : "No"), 10, 100);
     
