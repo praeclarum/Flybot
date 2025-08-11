@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <esp_log.h>
 
 #include "RadioController.h"
 #include "State.h"
@@ -70,6 +71,10 @@ void rcUpdate() {
                 packet[0] = 0x0F;
                 packetLen = 1;
             }
+            else {
+                // Not a start byte, ignore
+                ESP_LOGE("RadioController", "Invalid start byte: 0x%02X", c);
+            }
         }
         else {
             packet[packetLen] = c;
@@ -92,8 +97,11 @@ void rcUpdate() {
                             break;
                         }
                     }
-                    if (!foundStartByte) {
-                        // No new start byte found, reset the packet
+                    if (foundStartByte) {
+                        ESP_LOGE("RadioController", "Invalid packet, shifted to new start byte, new length: %d", packetLen);
+                    }
+                    else {
+                        ESP_LOGE("RadioController", "Invalid packet, no new start byte found, resetting packet");
                         packetLen = 0;
                     }
                 }
