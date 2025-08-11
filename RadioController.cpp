@@ -77,8 +77,26 @@ void rcUpdate() {
             if (packetLen >= 25) {
                 if (c == 0x00) {
                     parsePacket();
+                    packetLen = 0;
                 }
-                packetLen = 0;
+                else {
+                    // Invalid packet, look for a new start byte within the packet
+                    bool foundStartByte = false;
+                    for (size_t i = 1; i < packetLen; i++) {
+                        if (packet[i] == 0x0F) {
+                            // Found a new start byte, shift the packet
+                            for (size_t j = 0; j < packetLen - i; j++)
+                                packet[j] = packet[i + j];
+                            packetLen -= i;
+                            foundStartByte = true;
+                            break;
+                        }
+                    }
+                    if (!foundStartByte) {
+                        // No new start byte found, reset the packet
+                        packetLen = 0;
+                    }
+                }
             }
         }
     }
