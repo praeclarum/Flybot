@@ -137,7 +137,6 @@ static const char *htmlContent PROGMEM = R"(<!DOCTYPE html>
     <h1>Flybot</h1>
     <div>
         <canvas id="hud" width="480" height="320"></canvas>
-        <button onclick='getState()'>Update</button>
     </div>
     <div>
     <input type="text" id="command" placeholder="Send a command">
