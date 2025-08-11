@@ -1,5 +1,7 @@
-#include "HardwareSerial.h"
 #include <Arduino.h>
+
+#include "RadioController.h"
+#include "State.h"
 
 HardwareSerial *serial = 0;
 
@@ -35,13 +37,14 @@ static void parsePacket() {
     } else {
         // Serial.printf("RC: Got valid packet: hasSignal: %s, ch1: %4d, ch2: %4d, ch3: %4d, ch4: %4d\n",
         //     hasSignal ? "true" : "false", ch1, ch2, ch3, ch4);
-        Serial.printf("RC: Got valid packet: hasSignal: %s, ch1: %.3f, ch2: %.3f, ch3: %.3f, ch4: %.3f\n",
-            hasSignal ? "true" : "false", ch1f, ch2f, ch3f, ch4f);
+        // Serial.printf("RC: Got valid packet: hasSignal: %s, ch1: %.3f, ch2: %.3f, ch3: %.3f, ch4: %.3f\n",
+        //     hasSignal ? "true" : "false", ch1f, ch2f, ch3f, ch4f);
     }
     const float thr = ch3f;
     const float yaw = ch4f;
     const float pitch = ch2f;
     const float roll = ch1f;
+    stateUpdateRC(pitch, roll, yaw, thr, hasSignal);
 }
 
 void rcBegin() {

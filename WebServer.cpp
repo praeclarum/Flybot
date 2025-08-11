@@ -65,10 +65,10 @@ ws.onopen = function() {
 ws.onmessage = function(event) {
     const data = JSON.parse(event.data);
     if (data.type === "state") {
-        state.rollDegrees = data.rd * rad2deg;
-        state.pitchDegrees = data.pd * rad2deg;
-        state.yawDegrees = data.yd * rad2deg;
-        state.throttlePercent = data.th;
+        state.rollDegrees = data.mr * rad2deg;
+        state.pitchDegrees = data.mp * rad2deg;
+        state.yawDegrees = data.my * rad2deg;
+        state.throttlePercent = data.rt * 100.0;
         state.armed = data.a;
         drawAll();
     }
@@ -175,10 +175,13 @@ void webServerBegin() {
     wsHandler.onMessage([](AsyncWebSocket *server, AsyncWebSocketClient *client, const uint8_t *data, size_t len) {
         if (strncmp((const char *)data, "state", min((size_t)5, len)) == 0) {
             const State &state = getState();
-            String stateData = "{\"type\":\"state\",\"rd\":" + String(state.rollRadians)
-                + ",\"pd\":" + String(state.pitchRadians, 3)
-                + ",\"yd\":" + String(state.yawRadians, 3)
-                + ",\"th\":" + String(state.throttle, 3)
+            String stateData = "{\"type\":\"state\",\"mr\":" + String(state.rollRadians, 3)
+                + ",\"mp\":" + String(state.pitchRadians, 3)
+                + ",\"my\":" + String(state.yawRadians, 3)
+                + ",\"rr\":" + String(state.rcRoll, 3)
+                + ",\"rp\":" + String(state.rcPitch, 3)
+                + ",\"ry\":" + String(state.rcYaw, 3)
+                + ",\"rt\":" + String(state.rcThrottle, 3)
                 + ",\"a\":" + String(state.armed?"true":"false") + "}";
             server->text(client->id(), stateData);
             return;
