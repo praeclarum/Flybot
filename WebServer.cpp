@@ -182,8 +182,8 @@ void webServerBegin() {
             String stateData = "{\"type\":\"state\",\"mr\":" + String(state.rollRadians, 3)
                 + ",\"mp\":" + String(state.pitchRadians, 3)
                 + ",\"my\":" + String(state.yawRadians, 3)
-                + ",\"rr\":" + String(state.rcRoll, 3)
-                + ",\"rp\":" + String(state.rcPitch, 3)
+                + ",\"rr\":" + String(state.rcRollRadians, 3)
+                + ",\"rp\":" + String(state.rcPitchRadians, 3)
                 + ",\"ry\":" + String(state.rcYaw, 3)
                 + ",\"rt\":" + String(state.rcThrottle, 3)
                 + ",\"a\":" + String(state.armed?"true":"false") + "}";

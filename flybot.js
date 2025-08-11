@@ -5,6 +5,8 @@ let state = {
     pitchDegrees: 0.0,
     yawDegrees: 0.0,
     throttlePercent: 0.0,
+    rcRollDegrees: 0.0,
+    rcPitchDegrees: 0.0,
     armed: false,
 };
 
@@ -31,6 +33,8 @@ class FlySocket {
                 state.rollDegrees = data.mr * rad2deg;
                 state.pitchDegrees = data.mp * rad2deg;
                 state.yawDegrees = data.my * rad2deg;
+                state.rcRollDegrees = data.rr * rad2deg;
+                state.rcPitchDegrees = data.rp * rad2deg;
                 state.throttlePercent = data.rt * 100.0;
                 state.armed = data.a;
                 drawAll();
@@ -113,7 +117,6 @@ function drawHUD(ctx, x, y, width, height) {
     ctx.stroke();
     // Draw pitch lines
     ctx.translate(0, -pitchOffset);
-    
     ctx.lineWidth = 1;
     const pitchLineLen = width * 0.25;
     for (let i = -50; i <= 50; i += 5) {
@@ -131,10 +134,11 @@ function drawHUD(ctx, x, y, width, height) {
             ctx.fillText(i + "°", cx + len / 2 + 5, pitchY + 5);
         }
     }
-
     ctx.restore();
 
+    //
     // Draw the yaw indicator
+    //
     const yawHeight = height * 0.1;
     const yawPxPerDeg = (width / 2) / 45;
     // yaw_x = yawPxPerDeg * deg + yawOffset
@@ -211,6 +215,54 @@ function drawHUD(ctx, x, y, width, height) {
     ctx.moveTo(x, yawHeight);
     ctx.lineTo(x + width, yawHeight);
     ctx.stroke();
+
+    //
+    // Draw command reticle
+    //
+    ctx.save();
+    
+    ctx.translate(cx, cy);
+    ctx.rotate(state.rcRollDegrees * Math.PI / 180);
+    ctx.translate(-cx, -cy);
+    // Calculate the pitch vertical translation
+    const rcPitchOffset = state.rcPitchDegrees * pitchPxPerDeg;
+    ctx.translate(0, rcPitchOffset);
+    const commandThickness = 10;
+    const commandWidth = width * 0.175;
+    const commandGap = width * 0.075;
+    ctx.fillStyle = "#FCFF49";
+    ctx.strokeStyle = "#000000";
+    ctx.lineWidth = 0.5;
+    const addReticle = (reflection) => {
+        ctx.beginPath();
+        ctx.moveTo(cx + reflection*(commandGap), cy - commandThickness/2);
+        ctx.lineTo(cx + reflection*(commandGap + commandWidth), cy - commandThickness/2);
+        ctx.lineTo(cx + reflection*(commandGap + commandWidth), cy + commandThickness/2);
+        ctx.lineTo(cx + reflection*(commandGap + commandThickness), cy + commandThickness/2);
+        ctx.lineTo(cx + reflection*(commandGap + commandThickness), cy + commandThickness/2 + commandThickness);
+        ctx.lineTo(cx + reflection*(commandGap), cy + commandThickness/2 + commandThickness);
+        ctx.closePath();
+    };
+    for (let reflection = -1; reflection <= 1; reflection += 2) {
+        addReticle(reflection);
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = "rgba(0, 0, 0, 0.25)";
+        ctx.fill();
+        addReticle(reflection);
+        ctx.shadowColor = "rgba(0, 0, 0, 0)";
+        ctx.stroke();
+    }
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = "rgba(0, 0, 0, 0.25)";
+    ctx.fillRect(cx - commandThickness / 2, cy - commandThickness / 2, commandThickness, commandThickness);
+    ctx.shadowColor = "rgba(0, 0, 0, 0)";
+    ctx.strokeRect(cx - commandThickness / 2, cy - commandThickness / 2, commandThickness, commandThickness);
+
+    ctx.restore();
 
     ctx.fillStyle = "#000000";
     ctx.font = "16px sans-serif";

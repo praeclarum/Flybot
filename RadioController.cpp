@@ -2,11 +2,16 @@
 
 #include "RadioController.h"
 #include "State.h"
+#include "ConfigValue.h"
+#include "Geometry.h"
 
 HardwareSerial *serial = 0;
 
 static uint8_t packet[25] = {0};
 static uint8_t packetLen = 0;
+
+ConfigValue rcPitchMaxDegrees("rc.pitch.max", "Maximum pitch angle (degrees)", Value::fromFloat(60.0f));
+ConfigValue rcRollMaxDegrees("rc.roll.max", "Maximum roll angle (degrees)", Value::fromFloat(60.0f));
 
 static void parsePacket() {
     bool failSafe = (packet[23] & 0x08) != 0; // True when no RC signal
@@ -42,9 +47,14 @@ static void parsePacket() {
     }
     const float thr = ch3f;
     const float yaw = ch4f;
-    const float pitch = ch2f;
-    const float roll = ch1f;
-    stateUpdateRC(pitch, roll, yaw, thr, hasSignal);
+    const float pitchDegrees = (ch2f * 2.0f - 1.0f) * rcPitchMaxDegrees.getFloat();
+    const float rollDegrees = (ch1f * 2.0f - 1.0f) * rcRollMaxDegrees.getFloat();
+    stateUpdateRC(
+        pitchDegrees * DEG_TO_RAD_F,
+        rollDegrees * DEG_TO_RAD_F,
+        yaw,
+        thr,
+        hasSignal);
 }
 
 void rcBegin() {

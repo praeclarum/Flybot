@@ -13,8 +13,8 @@ void stateUpdateOrientation(float pitchRadians, float rollRadians, float yawRadi
 }
 
 void stateUpdateRC(float pitch, float roll, float yaw, float throttle, bool ok) {
-    currentState.rcPitch = pitch;
-    currentState.rcRoll = roll;
+    currentState.rcPitchRadians = pitch;
+    currentState.rcRollRadians = roll;
     currentState.rcYaw = yaw;
     currentState.rcThrottle = throttle;
     currentState.rcOK = ok;

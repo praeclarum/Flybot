@@ -5,8 +5,8 @@ struct State {
     float rollRadians;
     float yawRadians;
 
-    float rcPitch;
-    float rcRoll;
+    float rcPitchRadians;
+    float rcRollRadians;
     float rcYaw;
     float rcThrottle;
     bool rcOK;
@@ -15,7 +15,7 @@ struct State {
 
     State()
         : pitchRadians(0.0f), rollRadians(0.0f), yawRadians(0.0f)
-        , rcPitch(0.0f), rcRoll(0.0f), rcYaw(0.0f)
+        , rcPitchRadians(0.0f), rcRollRadians(0.0f), rcYaw(0.0f)
         , rcThrottle(0.0f)
         , rcOK(false)
         , armed(false)
