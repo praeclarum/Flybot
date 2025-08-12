@@ -143,7 +143,7 @@ static const char *htmlContent PROGMEM = R"(<!DOCTYPE html>
     <button onclick='sendCommand()'>Send</button>
     </div>
     <!--<script type="text/javascript" src="script.js"></script>-->
-    <script type="text/javascript" src="http://192.168.4.2/flybot.js"></script>
+    <script type="text/javascript" src="https://praeclarum.org/Flybot/flybot.js"></script>
     <script type="text/javascript">
         flybotStart("flybot.local");
     </script>
