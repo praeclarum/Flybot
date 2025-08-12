@@ -34,12 +34,15 @@ void setup() {
     char accessPointName[128];
     sprintf(accessPointName, "%s-%s", hostName, serialNumber);
     WiFi.mode(WIFI_AP);
+    WiFi.softAPConfig(IPAddress(192, 168, 112, 1), IPAddress(192, 168, 112, 1), IPAddress(255, 255, 255, 0));
     WiFi.softAP(accessPointName);
-    const auto ip = WiFi.softAPIP();
     Serial.printf("Access Point: %s\n", accessPointName);
+    Serial.printf("IP Address:   %s\n", WiFi.softAPIP().toString().c_str());
+    Serial.printf("Broadcast IP: %s\n", WiFi.softAPBroadcastIP().toString().c_str());
+    Serial.printf("Network ID:   %s\n", WiFi.softAPNetworkID().toString().c_str());
+    Serial.printf("Subnet Mask:  %s\n", WiFi.softAPSubnetMask().toString().c_str());
 #endif
     Serial.printf("Host:         %s.local\n", hostName);
-    Serial.printf("IP Address:   %s\n", ip.toString().c_str());
     MDNS.begin(hostName);
     MDNS.addService("http", "tcp", 80);
 
