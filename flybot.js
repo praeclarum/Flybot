@@ -8,6 +8,12 @@ let state = {
     rcRollDegrees: 0.0,
     rcPitchDegrees: 0.0,
     armed: false,
+    motor1Command: 0.0,
+    motor2Command: 0.0,
+    motor3Command: 0.0,
+    motor4Command: 0.0,
+    motor5Command: 0.0,
+    motor6Command: 0.0
 };
 
 let config = {
@@ -41,6 +47,12 @@ class FlySocket {
                 state.rcPitchDegrees = data.rp * rad2deg;
                 state.throttlePercent = data.rt * 100.0;
                 state.armed = data.a;
+                state.motor1Command = data.m1;
+                state.motor2Command = data.m2;
+                state.motor3Command = data.m3;
+                state.motor4Command = data.m4;
+                state.motor5Command = data.m5;
+                state.motor6Command = data.m6;
                 drawAll();
             }
         };
@@ -83,7 +95,8 @@ function drawAll() {
 }
 
 function drawHUD(ctx, x, y, width, height) {
-    ctx.font = "16px sans-serif";
+    const font = "sans-serif";
+    ctx.font = `16px ${font}`;
 
     const cx = x + width / 2;
     const cy = y + height / 2;
@@ -143,7 +156,8 @@ function drawHUD(ctx, x, y, width, height) {
     //
     // Draw the yaw indicator
     //
-    const yawHeight = height * 0.1;
+    const yawHeight = height * 0.075;
+    ctx.font = `${yawHeight*0.5}px ${font}`;
     const yawPxPerDeg = (width / 2) / 45;
     // yaw_x = yawPxPerDeg * deg + yawOffset
     // cx = yawPxPerDeg * yawDegrees + yawOffset
@@ -161,7 +175,7 @@ function drawHUD(ctx, x, y, width, height) {
         ctx.lineWidth = (i % 10 === 0) ? 3 : 2;
         ctx.beginPath();
         ctx.moveTo(yawX, 0);
-        ctx.lineTo(yawX, (i % 10 === 0) ? 12 : 6);
+        ctx.lineTo(yawX, (i % 10 === 0) ? yawHeight*0.5 : yawHeight*0.25);
         ctx.stroke();
         if (i % 10 === 0) {
             let displayI = i;
@@ -208,9 +222,10 @@ function drawHUD(ctx, x, y, width, height) {
         displayI -= 360;
     }
     const yawText = displayI.toFixed(0) + "°";
-    const yawTextWidth = ctx.measureText(yawText).width;
+    const yawTextSize = ctx.measureText(yawText);
+    const yawTextWidth = yawTextSize.width;
     ctx.fillStyle = "rgba(0, 0, 0, 1.0)";
-    ctx.fillRect(cx - yawTextWidth / 2 - 5, yawHeight - 20, yawTextWidth + 10, 20);
+    ctx.fillRect(cx - yawTextWidth / 2 - 5, yawHeight - 10 - yawTextSize.actualBoundingBoxAscent, yawTextWidth + 10, yawTextSize.actualBoundingBoxAscent + 10);
     ctx.fillStyle = "#FFFFFF";
     ctx.fillText(yawText, cx - yawTextWidth / 2, yawHeight - 5);
     ctx.strokeStyle = "rgba(255, 255, 255, 1)";
@@ -268,6 +283,14 @@ function drawHUD(ctx, x, y, width, height) {
 
     ctx.restore();
 
+    //
+    // Draw motor commands
+    //
+    const droneSize = height * 0.25;
+    const droneX = x + width - droneSize;
+    const droneY = y + height - droneSize;
+    drawDrone(ctx, droneX, droneY, droneSize, droneSize);
+
     ctx.fillStyle = "#000000";
     ctx.font = "16px sans-serif";
     ctx.fillText("Roll: " + state.rollDegrees.toFixed(1) + "°", 10, 60);
@@ -287,11 +310,15 @@ function drawDrone(ctx, x, y, width, height) {
         maxXMM = Math.max(maxXMM, Math.abs(motorXMM));
         maxYMM = Math.max(maxYMM, Math.abs(motorYMM));
     }
-    const pxPerMMX = 0.4 * width / maxXMM;
-    const pxPerMMY = 0.4 * height / maxYMM;
+    if (maxXMM < 0.1 || maxYMM < 0.1) {
+        return;
+    }
+    const motorRadius = width * 0.1;
+    const padding = 16;
+    const pxPerMMX = 0.4 * (width - 2*padding) / maxXMM;
+    const pxPerMMY = 0.4 * (height - 2*padding) / maxYMM;
     const pxPerMM = Math.min(pxPerMMX, pxPerMMY);
-    const thickness = Math.max(1, dim * 0.01);
-    const motorRadius = 16 * pxPerMM;
+    const thickness = Math.max(1, dim * 0.02);
     const cx = x + width / 2;
     const cy = y + height / 2;
     ctx.lineWidth = thickness;
@@ -299,23 +326,54 @@ function drawDrone(ctx, x, y, width, height) {
     ctx.font = `${motorRadius}px sans-serif`;
     for (let i = 1; i <= config.numMotors; i++) {
         const motorDir = config[`motor${i}.direction`];
-        ctx.strokeStyle = motorDir > 0 ? "#0F0" : "#F00";
         const key = `motor${i}`;
         const motorX = config[key + ".x"] * pxPerMM + cx;
         const motorY = -config[key + ".y"] * pxPerMM + cy;
+        const motorCommand = state[`${key}Command`];
+        if (motorCommand >= 0.0) {
+            ctx.fillStyle = `rgba(0, 255, 0, ${motorCommand})`;
+        }
+        else {
+            ctx.fillStyle = `rgba(255, 0, 0, ${-motorCommand})`;
+        }
+        ctx.beginPath();
+        ctx.arc(motorX, motorY, motorRadius, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.strokeStyle = motorDir > 0 ? "#0F0" : "#F00";
         ctx.beginPath();
         ctx.arc(motorX, motorY, motorRadius, 0, 2 * Math.PI);
         ctx.stroke();
         const label = `M${i}`;
         const textSize = ctx.measureText(label);
+        ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
         ctx.fillText(label, motorX - textSize.width / 2, motorY + textSize.actualBoundingBoxAscent / 2);
+        const value = motorCommand.toFixed(2);
+        const valueSize = ctx.measureText(value);
+        ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+        ctx.fillText(value, motorX - valueSize.width / 2, motorY + motorRadius + thickness*2 + valueSize.actualBoundingBoxAscent);
     }
 }
 
 function flybotStart(root) {
     flybotRoot = root;
     flySocket.start();
+    // Get config
+    fetch("config.json")
+    .then(response => response.json())
+    .then(data => {
+        console.log("Config data:", data);
+        config = data;
+    })
+    .catch(error => {
+        console.error("Error fetching config.json:", error);
+    });
+
     // Initial draw
+    const $hud = document.getElementById("hud");
+    $hud.width = 800;
+    $hud.height = 600;
+    $hud.style.width = "800px";
+    $hud.style.height = "600px";
     drawAll();
     // Update state at 2Hz
     setInterval(() => {

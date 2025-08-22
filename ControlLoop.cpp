@@ -2,6 +2,8 @@
 #include "Geometry.h"
 #include "MPU.h"
 #include "State.h"
+#include "PID.h"
+#include "Motors.h"
 
 #define CONTROL_LOOP_HZ 100
 #define CONTROL_LOOP_INTERVAL_MICROS (1000000 / CONTROL_LOOP_HZ)
@@ -13,6 +15,17 @@ static unsigned long nextControlLoopMicros = 0;
 static int loopCounter = 0;
 
 const int numCalCount = 300;
+
+static const float dDefaultFilter = 0.1f;
+static const float dDefaultLimit = 0.2f;
+static const float iDefaultLimit = 0.2f;
+static const float defaultLimit = 1.0f;
+
+PID pitchPID("pitchPID", 0.1f, 0.01f, 0.05f,
+    dDefaultFilter, iDefaultLimit, dDefaultLimit, defaultLimit);
+PID rollPID("rollPID", 0.1f, 0.01f, 0.05f,
+    dDefaultFilter, iDefaultLimit, dDefaultLimit, defaultLimit);
+MotorMixer motorMixer;
 
 static Quaternion combineCommands(const Quaternion& qYaw, const Quaternion& qPitch, const Quaternion& qRoll) {
     // Typical order: yaw * pitch * roll
@@ -37,11 +50,9 @@ void controlLoop(MPU &mpu) {
         nextControlLoopMicros = nowMicros + CONTROL_LOOP_INTERVAL_MICROS;
     }
     
+    //
     // Read sensor data
-    // const auto mpuData = mpu6050.read();
-    // Serial.printf("%f,%f,%f\n", mpuData.accelX, mpuData.accelY, mpuData.accelZ);
-    // Serial.printf("%f,%f,%f\n", mpuData.gyroX, mpuData.gyroY, mpuData.gyroZ);
-    // Serial.println(dtMicros);
+    //
     if (loopCounter == 0) {
         mpu.beginCalibration();
     }
@@ -50,18 +61,48 @@ void controlLoop(MPU &mpu) {
     }
     mpu.update();
 
-    Quaternion qYaw, qRoll;
-    const float pitchCommandDeg = 45.0f;
-    Quaternion qPitch = Quaternion::fromEulerAngles(Vector(pitchCommandDeg * deg2rad, 0.0f, 0.0f));
     const auto currentOrientation = mpu.getOrientation();
-    Quaternion qCmd = combineCommands(qYaw, qPitch, qRoll);
-    Quaternion qError = getOrientationError(currentOrientation, qCmd);
-    Vector orientEuler = currentOrientation.toEulerAngles();
-    Vector errorEuler = qError.toEulerAngles();
-
+    const Vector orientEuler = currentOrientation.toEulerAngles();
+    
     stateUpdateOrientation(orientEuler.x, orientEuler.y, orientEuler.z);
 
+    //
+    // Read commands and compute errors
+    //
+    const State stateBeforeCommands = getState();
+    const float pitchCommandRad = stateBeforeCommands.rcPitchRadians;
+    const float rollCommandRad = stateBeforeCommands.rcRollRadians;
+    const auto qYaw = Quaternion::fromEulerAngles(Vector(0.0f, 0.0f, orientEuler.z));
+    const auto qPitch = Quaternion::fromEulerAngles(Vector(pitchCommandRad, 0.0f, 0.0f));
+    const auto qRoll = Quaternion::fromEulerAngles(Vector(0.0f, rollCommandRad, 0.0f));
+    const auto qCmd = combineCommands(qYaw, qPitch, qRoll);
+    const auto qError = getOrientationError(currentOrientation, qCmd);
+    const Vector errorEuler = qError.toEulerAngles();
+
+    //
+    // Compute PID outputs
+    //
     // Serial.printf("%.3f,%.3f,%.3f\n", orientEuler.x * rad2deg, pitchCommandDeg, errorEuler.x * rad2deg);
+    const float pitchOutput = pitchPID.updateError(errorEuler.x);
+    const float rollOutput = rollPID.updateError(errorEuler.y);
+
+    //
+    // Mix outputs into motor commands
+    //
+    motorMixer.updateMotorMix();
+    MixValues mixValues;
+    mixValues.thrust = stateBeforeCommands.rcThrottle;
+    mixValues.pitch = pitchOutput;
+    mixValues.roll = rollOutput;
+    mixValues.yaw = stateBeforeCommands.rcYaw;
+    motorMixer.mix(mixValues);
+    stateUpdateMotorCommands(
+        motorMixer.getMotorCommand(0),
+        motorMixer.getMotorCommand(1),
+        motorMixer.getMotorCommand(2),
+        motorMixer.getMotorCommand(3),
+        motorMixer.getMotorCommand(4),
+        motorMixer.getMotorCommand(5));
 
     loopCounter++;
 }

@@ -19,3 +19,12 @@ void stateUpdateRC(float pitch, float roll, float yaw, float throttle, bool ok) 
     currentState.rcThrottle = throttle;
     currentState.rcOK = ok;
 }
+
+void stateUpdateMotorCommands(float motor1, float motor2, float motor3, float motor4, float motor5, float motor6) {
+    currentState.motor1Command = motor1;
+    currentState.motor2Command = motor2;
+    currentState.motor3Command = motor3;
+    currentState.motor4Command = motor4;
+    currentState.motor5Command = motor5;
+    currentState.motor6Command = motor6;
+}

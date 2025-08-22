@@ -138,13 +138,13 @@ static const char *htmlContent PROGMEM = R"(<!DOCTYPE html>
 <body>
     <h1>Flybot</h1>
     <div>
-        <canvas id="hud" width="480" height="320"></canvas>
+        <canvas id="hud"></canvas>
     </div>
     <div>
     <input type="text" id="command" placeholder="Send a command">
     <button onclick='sendCommand()'>Send</button>
     </div>
-    <script type="text/javascript" src="https://praeclarum.org/Flybot/flybot.js"></script>
+    <script type="text/javascript" src="http://192.168.112.2/flybot.js"></script>
     <script type="text/javascript">
         flybotStart("flybot.local");
     </script>
@@ -233,7 +233,14 @@ void webServerBegin() {
                 + ",\"rp\":" + String(state.rcPitchRadians, 3)
                 + ",\"ry\":" + String(state.rcYaw, 3)
                 + ",\"rt\":" + String(state.rcThrottle, 3)
-                + ",\"a\":" + String(state.armed?"true":"false") + "}";
+                + ",\"a\":" + String(state.armed?"true":"false")
+                + ",\"m1\":" + String(state.motor1Command, 3)
+                + ",\"m2\":" + String(state.motor2Command, 3)
+                + ",\"m3\":" + String(state.motor3Command, 3)
+                + ",\"m4\":" + String(state.motor4Command, 3)
+                + ",\"m5\":" + String(state.motor5Command, 3)
+                + ",\"m6\":" + String(state.motor6Command, 3)
+                + "}";
             server->text(client->id(), stateData);
             return;
         }
