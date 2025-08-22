@@ -10,6 +10,10 @@ let state = {
     armed: false,
 };
 
+let config = {
+    numMotors: 0
+};
+
 const rad2deg = 180 / Math.PI;
 
 //
@@ -272,6 +276,42 @@ function drawHUD(ctx, x, y, width, height) {
     
 }
 
+function drawDrone(ctx, x, y, width, height) {
+    const dim = Math.min(width, height);
+    let maxXMM = 0;
+    let maxYMM = 0;
+    for (let i = 1; i <= config.numMotors; i++) {
+        const key = `motor${i}`;
+        const motorXMM = config[key + ".x"];
+        const motorYMM = -config[key + ".y"];
+        maxXMM = Math.max(maxXMM, Math.abs(motorXMM));
+        maxYMM = Math.max(maxYMM, Math.abs(motorYMM));
+    }
+    const pxPerMMX = 0.4 * width / maxXMM;
+    const pxPerMMY = 0.4 * height / maxYMM;
+    const pxPerMM = Math.min(pxPerMMX, pxPerMMY);
+    const thickness = Math.max(1, dim * 0.01);
+    const motorRadius = 16 * pxPerMM;
+    const cx = x + width / 2;
+    const cy = y + height / 2;
+    ctx.lineWidth = thickness;
+    ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+    ctx.font = `${motorRadius}px sans-serif`;
+    for (let i = 1; i <= config.numMotors; i++) {
+        const motorDir = config[`motor${i}.direction`];
+        ctx.strokeStyle = motorDir > 0 ? "#0F0" : "#F00";
+        const key = `motor${i}`;
+        const motorX = config[key + ".x"] * pxPerMM + cx;
+        const motorY = -config[key + ".y"] * pxPerMM + cy;
+        ctx.beginPath();
+        ctx.arc(motorX, motorY, motorRadius, 0, 2 * Math.PI);
+        ctx.stroke();
+        const label = `M${i}`;
+        const textSize = ctx.measureText(label);
+        ctx.fillText(label, motorX - textSize.width / 2, motorY + textSize.actualBoundingBoxAscent / 2);
+    }
+}
+
 function flybotStart(root) {
     flybotRoot = root;
     flySocket.start();
@@ -287,14 +327,12 @@ function flybotStart(root) {
 // CONFIG
 //
 
-let config = {
-    "numMotors": 0
-};
 const $motorUIs = {};
 
 function buildConfigUI() {
     const $config = document.getElementById("config");
     $config.innerHTML = `
+        <div><canvas id="droneCanvas" width="400" height="400"></canvas></div>
         <label for="numMotors">Num Motors:</label>
         <input type="number" id="numMotors" min="1" max="6" value="${config.numMotors}" onchange="updateMotorConfig('numMotors', this.value)">
     `;
@@ -306,11 +344,23 @@ function buildConfigUI() {
     updateConfigUI();
 }
 
+function drawConfig() {
+    const canvas = document.getElementById("droneCanvas");
+    const ctx = canvas.getContext("2d");
+    const width = canvas.width;
+    const height = canvas.height;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(0, 0, width, height);
+    drawDrone(ctx, 0, 0, width, height);
+}
+
 function updateConfigUI() {
     for (let i = 1; i <= 6; i++) {
         const $motorUI = $motorUIs[i];
         $motorUI.style.display = (i <= config.numMotors) ? "block" : "none";
     }
+    drawConfig();
 }
 
 function buildMotorConfigUI(motorId) {
@@ -320,10 +370,18 @@ function buildMotorConfigUI(motorId) {
     $motorUI.innerHTML = `
         <div id="${key}-config">
         <h3>Motor ${motorId}</h3>
-        <label for="${key}-x">X:</label>
-        <input type="number" id="${key}-x" value="${config[key+".x"]}" onchange="updateMotorConfig('${key}.x', this.value)">&nbsp;mm
-        <label for="${key}-y">Y:</label>
-        <input type="number" id="${key}-y" value="${config[key+".y"]}" onchange="updateMotorConfig('${key}.y', this.value)">&nbsp;mm
+        <table>
+        <tr>
+        <th><label for="${key}-x">X</label></th>
+        <td><input type="number" id="${key}-x" value="${config[key+".x"]}" onchange="updateMotorConfig('${key}.x', this.value)">&nbsp;mm</td>
+        <th><label for="${key}-y" style="margin-left: 1em;">Y</label></th>
+        <td><input type="number" id="${key}-y" value="${config[key+".y"]}" onchange="updateMotorConfig('${key}.y', this.value)">&nbsp;mm</td>
+        </tr>
+        <tr>
+        <th><label for="${key}-direction">Dir</label></th>
+        <td><input type="number" id="${key}-direction" min="-1" max="1" value="${config[key+".direction"]}" onchange="updateMotorConfig('${key}.direction', this.value)"></td>
+        </tr>
+        </table>
         </div>
     `;
     return $motorUI;
