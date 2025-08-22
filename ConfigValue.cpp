@@ -54,7 +54,7 @@ void ConfigValue::setValueString(const String &newValueString) {
     const auto oldValue = value;
     value.setToString(newValueString);
     if (value != oldValue) {
-        ESP_LOGI("Config", "Config set %s = %s (was %s) (from %s)", name.c_str(), value.toString().c_str(), oldValue.toString().c_str(), newValueString.c_str());
+        ESP_LOGI("Config", "Config set %s = %s (was %s) (from \"%s\")", name.c_str(), value.toString().c_str(), oldValue.toString().c_str(), newValueString.c_str());
         configValuesSave();
     }
 }
@@ -104,11 +104,18 @@ void listDir(fs::FS &fs, const char *dirname, uint8_t levels) {
     }
 }
 
+enum JSONParseState {
+    JS_NeedObject,
+    JS_NeedKey,
+    JS_InKey,
+    JS_NeedColon,
+    JS_NeedValue,
+    JS_InValue
+};
 
 void configValuesLoad() {
     // listDir(SPIFFS, "/", 0);
     const char *path = "/config.json";
-    Serial.printf("Reading file: %s\r\n", path);
 
     File file = SPIFFS.open(path);
     if (!file || file.isDirectory()) {
@@ -116,9 +123,62 @@ void configValuesLoad() {
         return;
     }
 
-    Serial.println("+ read from file:");
+    JSONParseState state = JS_NeedObject;
+    String key;
+    String valueString;
     while (file.available()) {
-        Serial.write(file.read());
+        const auto ch = file.read();
+        if (ch <= 0)
+            break;
+        switch (state) {
+            case JS_NeedObject:
+                if (ch == '{') {
+                    state = JS_NeedKey;
+                }
+                break;
+            case JS_NeedKey:
+                if (ch == '"') {
+                    state = JS_InKey;
+                    key = "";
+                }
+                break;
+            case JS_InKey:
+                if (ch == '"') {
+                    state = JS_NeedColon;
+                }
+                else {
+                    key += (char)ch;
+                }
+                break;
+            case JS_NeedColon:
+                if (ch == ':') {
+                    state = JS_NeedValue;
+                }
+                break;
+            case JS_NeedValue:
+                if ((ch >= '0' && ch <= '9') || (ch == '-')) {
+                    state = JS_InValue;
+                    valueString = (char)ch;
+                }
+                break;
+            case JS_InValue:
+                if (isdigit(ch) || ch == '.' || ch == '-' || ch == 'e' || ch == 'E') {
+                    valueString += (char)ch;
+                } else if (ch == ',' || ch == '}' || ch == '\n') {
+                    ConfigValue *config = findConfig(key);
+                    if (!config) {
+                        ESP_LOGE("Config", "Unknown config key: %s", key.c_str());
+                    }
+                    else {
+                        ESP_LOGI("Config", "Loaded config: %s = %s", key.c_str(), valueString.c_str());
+                        config->value.setToString(valueString);
+                    }
+                    state = (ch == ',') ? JS_NeedKey : JS_NeedObject;
+                } else {
+                    ESP_LOGW("Config", "Unexpected character in value: %c", ch);
+                }
+                break;
+        }
     }
     file.close();
 }
@@ -133,7 +193,7 @@ static void configValuesSave() {
 
     File file = SPIFFS.open(tmpPath, FILE_WRITE);
     if (!file) {
-        Serial.println("! Failed to open config.json for writing");
+        ESP_LOGE("Config", "Failed to open config.json for writing");
         return;
     }
     file.print("{");
@@ -147,13 +207,13 @@ static void configValuesSave() {
     if (ok) {
         if (SPIFFS.remove(path)) {
             SPIFFS.rename(tmpPath, path);
-            Serial.printf("Saved file: %s\n", path);
+            ESP_LOGI("Config", "Config saved to %s", path);
         }
         else {
-            Serial.printf("! Failed to remove old file: %s\n", path);
+            ESP_LOGE("Config", "Failed to remove old file: %s", path);
             SPIFFS.remove(tmpPath);
         }
     } else {
-        Serial.println("! Write failed");
+        ESP_LOGE("Config", "Write failed");
     }
 }

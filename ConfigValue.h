@@ -9,6 +9,8 @@ class ConfigValue {
     String descriptionHtml;
     Value defaultValue;
     Value value;
+
+    friend void configValuesLoad();
 public:
     ConfigValue(const String &name, const String &descriptionHtml, Value defaultValue);
     inline const String &getName() const {
