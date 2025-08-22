@@ -208,10 +208,30 @@ void webServerBegin() {
         stream->print("}");
         request->send(stream);
     });
+    server.on("/config_defaults.json", HTTP_GET, [](AsyncWebServerRequest *request) {
+        auto stream = request->beginResponseStream("application/json", 1200);
+        stream->print("{");
+        const char *head = "";
+        configDefaultValuesIterate([&](const String &key, const Value &value) {
+            stream->print(head);
+            stream->print("\"");
+            stream->print(key);
+            stream->print("\":");
+            stream->print(value.toString());
+            head = ",";
+        });
+        stream->print("}");
+        request->send(stream);
+    });
     server.on("/config_value", HTTP_POST, [](AsyncWebServerRequest *request) {
         const auto key = request->arg("key");
         const auto valueString = request->arg("value");
         const auto success = configValueSetString(key, valueString);
+        request->send(200, "application/json", "{\"success\":" + String(success ? "true" : "false") + "}");
+    });
+    server.on("/config_restore", HTTP_POST, [](AsyncWebServerRequest *request) {
+        const auto key = request->arg("key");
+        const auto success = configValueRestore(key);
         request->send(200, "application/json", "{\"success\":" + String(success ? "true" : "false") + "}");
     });
     

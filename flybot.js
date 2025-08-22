@@ -21,6 +21,9 @@ let state = {
 let config = {
     numMotors: 0
 };
+let configDefaults = {
+    numMotors: 0
+};
 
 const rad2deg = 180 / Math.PI;
 
@@ -477,6 +480,78 @@ function updateMotorConfig(key, value) {
     });
 }
 
+function buildConfigDefaultsUI() {
+    const keys = Object.keys(config).sort();
+    const $config = document.getElementById("config");
+    const $defaults = document.createElement("div");
+    $defaults.id = "config-defaults";
+    $defaults.innerHTML = `
+    <h2>Config Defaults</h2>
+    <table id="config-defaults-table">
+    <tr>
+    <th>Key</th>
+    <th style="text-align: right;">Value</th>
+    <th style="text-align: right;">Default Value</th>
+    <th>Restore</th>
+    </tr>
+    </table>
+    `;
+    const $table = $defaults.querySelector("#config-defaults-table");
+    $config.appendChild($defaults);
+    keys.forEach(key => {
+        const $row = document.createElement("tr");
+        const display = configDefaults[key] === config[key] ? "none" : "inline";
+        $row.innerHTML = `
+        <td>${key}</td>
+        <td style="text-align: right;">${config[key]}</td>
+        <td style="text-align: right;">${configDefaults[key]}</td>
+        <td><button onclick="restoreConfig('${key}')" style="display: ${display};">Restore</button></td>
+        `;
+        $table.appendChild($row);
+    });
+}
+
+function restoreConfig(key) {
+    console.log("Restoring config", key);
+    const urlParams = new URLSearchParams();
+    urlParams.append("key", key);
+    const url = "config_restore?" + urlParams.toString();
+    fetch(url, {
+        method: "POST",
+        body: ""
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Network response was not ok");
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log("Config updated successfully:", data);
+        updateConfigDefaultsUI();
+    })
+    .catch(error => {
+        console.error("Error updating config:", error);
+    });
+}
+
+function updateConfigDefaultsUI() {
+    // Delete old UI
+    const $defaults = document.getElementById("config-defaults");
+    if ($defaults) {
+        $defaults.remove();
+    }
+    fetch("config.json")
+    .then(response => response.json())
+    .then(data => {
+        console.log("Config data:", data);
+        config = data;
+        buildConfigDefaultsUI();
+    })
+    .catch(error => {
+        console.error("Error fetching config.json:", error);
+    });
+}
 
 function flybotConfigStart() {
     fetch("config.json")
@@ -490,5 +565,16 @@ function flybotConfigStart() {
     })
     .catch(error => {
         console.error("Error fetching config.json:", error);
+    });
+
+    fetch("config_defaults.json")
+    .then(response => response.json())
+    .then(data => {
+        console.log("Config default data:", data);
+        configDefaults = data;
+        buildConfigDefaultsUI();
+    })
+    .catch(error => {
+        console.error("Error fetching config_defaults.json:", error);
     });
 }

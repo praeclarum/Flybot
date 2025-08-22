@@ -65,9 +65,23 @@ void configValuesIterate(const std::function<void(const String &, const Value &)
     }
 }
 
+void configDefaultValuesIterate(const std::function<void(const String &, const Value &)> &callback) {
+    for (const auto *value : registry) {
+        callback(value->getName(), value->getDefaultValue());
+    }
+}
+
 bool configValueSetString(const String &name, const String &valueString) {
     if (auto *value = findConfig(name)) {
         value->setValueString(valueString);
+        return true;
+    }
+    return false;
+}
+
+bool configValueRestore(const String &name) {
+    if (auto *value = findConfig(name)) {
+        value->setValue(value->getDefaultValue());
         return true;
     }
     return false;
