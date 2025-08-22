@@ -72,7 +72,7 @@ class FlySocket {
         if (this.wsConnected) {
             this.ws.send(message);
         } else {
-            console.error("WebSocket not connected, cannot send message: " + message);
+            // console.error("WebSocket not connected, cannot send message: " + message);
         }
     }
 }
@@ -111,7 +111,7 @@ function drawHUD(ctx, x, y, width, height) {
     ctx.save();
     
     ctx.translate(cx, cy);
-    ctx.rotate(state.rollDegrees * Math.PI / 180);
+    ctx.rotate(-state.rollDegrees * Math.PI / 180);
     ctx.translate(-cx, -cy);
     // Calculate the pitch vertical translation
     const pitchPxPerDeg = (height / 2) / 35;
@@ -245,7 +245,7 @@ function drawHUD(ctx, x, y, width, height) {
     ctx.save();
     
     ctx.translate(cx, cy);
-    ctx.rotate(state.rcRollDegrees * Math.PI / 180);
+    ctx.rotate(-state.rcRollDegrees * Math.PI / 180);
     ctx.translate(-cx, -cy);
     // Calculate the pitch vertical translation
     const rcPitchOffset = state.rcPitchDegrees * pitchPxPerDeg;

@@ -10,6 +10,7 @@
 
 static const float deg2rad = 0.017453292519943295769236907684886f;
 static const float rad2deg = 57.295779513082320876798154814105f;
+static const float piOver2 = 1.5707963267948966192313216916398f;
 
 static unsigned long nextControlLoopMicros = 0;
 static int loopCounter = 0;
@@ -21,9 +22,9 @@ static const float dDefaultLimit = 0.2f;
 static const float iDefaultLimit = 0.2f;
 static const float defaultLimit = 1.0f;
 
-PID pitchPID("pitchPID", 0.1f, 0.0f, 0.0f,
+PID pitchPID("pitchPID", 1.0f / (piOver2), 0.0f, 0.0f,
     dDefaultFilter, iDefaultLimit, dDefaultLimit, defaultLimit);
-PID rollPID("rollPID", 0.1f, 0.0f, 0.0f,
+PID rollPID("rollPID", 1.0f / (piOver2), 0.0f, 0.0f,
     dDefaultFilter, iDefaultLimit, dDefaultLimit, defaultLimit);
 MotorMixer motorMixer;
 

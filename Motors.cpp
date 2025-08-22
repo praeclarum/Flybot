@@ -20,25 +20,40 @@ void MotorMixer::updateMotorMix() {
     if (maxX < 1.0f) maxX = 1.0f; // Prevent division by zero
     if (maxY < 1.0f) maxY = 1.0f; // Prevent division by zero
     for (size_t i = 0; i < numMotors; ++i) {
-        // [thrust, pitch, roll, yaw]
-        mixerMatrix[i].thrust = 1.0f; // All motors contribute equally to thrust
-        mixerMatrix[i].pitch  = motors[i]->y.getFloat() / maxY; // Pitch: y offset (rotation about X)
-        mixerMatrix[i].roll   = -motors[i]->x.getFloat() / maxX; // Roll: x offset (rotation about Y)
-        mixerMatrix[i].yaw    = static_cast<float>(motors[i]->direction.getInt()); // Yaw: CW/CCW
+        reversed[i] = motors[i]->direction.getInt() < 0;
+        const float dir = reversed[i] ? -1.0f : 1.0f;
+        mixerMatrix[i].thrust = dir; // All motors contribute equally to thrust
+        mixerMatrix[i].pitch  = motors[i]->y.getFloat() / maxY * dir; // Pitch: y offset (rotation about X)
+        mixerMatrix[i].roll   = -motors[i]->x.getFloat() / maxX * dir; // Roll: x offset (rotation about Y)
+        mixerMatrix[i].yaw    = dir; // Yaw: motor direction
     }
 }
 
 // Inputs: ControlInput (thrust, pitch, roll, yaw) in normalized units
 // Output: per-motor PWM in [-1, +1]
 void MotorMixer::mix(const MixValues& mixValues) {
+    float maxOut = 0.0f;
     for (size_t i = 0; i < numMotors; ++i) {
-        outputs[i]  = mixerMatrix[i].thrust * mixValues.thrust;
-        outputs[i] += mixerMatrix[i].pitch  * mixValues.pitch;
-        outputs[i] += mixerMatrix[i].roll   * mixValues.roll;
-        outputs[i] += mixerMatrix[i].yaw    * mixValues.yaw;
-        // Clamp output to [-1, +1]
-        if (outputs[i] > 1.0f) outputs[i] = 1.0f;
-        if (outputs[i] < -1.0f) outputs[i] = -1.0f;
+        float newOutput = 0.0f;
+        newOutput += mixerMatrix[i].thrust * mixValues.thrust;
+        newOutput += mixerMatrix[i].pitch  * mixValues.pitch;
+        newOutput += mixerMatrix[i].roll   * mixValues.roll;
+        newOutput += mixerMatrix[i].yaw    * mixValues.yaw;
+        if (reversed[i]) {
+            if (newOutput > 0.0f) newOutput = 0.0f;
+            if (-newOutput > maxOut) maxOut = -newOutput;
+        }
+        else {
+            if (newOutput < 0.0f) newOutput = 0.0f;
+            if (newOutput > maxOut) maxOut = newOutput;
+        }
+        outputs[i] = newOutput;
+    }
+    if (maxOut > 1.0f) {
+        const float invMax = 1.0f / maxOut;
+        // Normalize outputs to [-1, +1]
+        for (size_t i = 0; i < numMotors; ++i) {
+            outputs[i] *= invMax;
+        }
     }
 }
-

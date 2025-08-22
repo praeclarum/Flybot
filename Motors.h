@@ -17,11 +17,14 @@ class MotorMixer {
 private:
     size_t numMotors;
     MixValues mixerMatrix[MAX_MOTORS];
+    bool reversed[MAX_MOTORS];
     float outputs[MAX_MOTORS];
 public:
     MotorMixer()
         : numMotors(0) {
+        std::memset(mixerMatrix, 0, sizeof(mixerMatrix));
         std::memset(outputs, 0, sizeof(outputs));
+        std::memset(reversed, 0, sizeof(reversed));
     }
     size_t getNumMotors() const {
         return numMotors;
