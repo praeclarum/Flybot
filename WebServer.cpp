@@ -3,6 +3,8 @@
 
 #include <algorithm>
 
+#include "ConfigValue.h"
+
 #include "State.h"
 
 using namespace std;
@@ -165,6 +167,21 @@ void webServerBegin() {
     });
     server.on("/script.js", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(200, "application/javascript", (const uint8_t *)jsContent, jsContentLength);
+    });
+    server.on("/config.json", HTTP_GET, [](AsyncWebServerRequest *request) {
+        auto stream = request->beginResponseStream("application/json");
+        stream->print("{");
+        const char *head = "";
+        configValuesIterate([&](const String &key, const Value &value) {
+            stream->print(head);
+            stream->print("\"");
+            stream->print(key);
+            stream->print("\":");
+            stream->print(value.toString());
+            head = ",";
+        });
+        stream->print("}");
+        request->send(stream);
     });
     
     wsHandler.onConnect([](AsyncWebSocket *server, AsyncWebSocketClient *client) {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Arduino.h>
+#include <functional>
 #include "Value.h"
 
 class ConfigValue {
@@ -39,3 +40,5 @@ public:
         return value.toString(decimalPlaces);
     }
 };
+
+void configValuesIterate(const std::function<void(const String &, const Value &)> &callback);

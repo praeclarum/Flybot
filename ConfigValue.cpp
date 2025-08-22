@@ -41,3 +41,9 @@ void ConfigValue::setValue(const Value &newValue) {
     ESP_LOGI("Config", "Setting %s to %s", name.c_str(), newValue.toString().c_str());
     value = newValue;
 }
+
+void configValuesIterate(const std::function<void(const String &, const Value &)> &callback) {
+    for (const auto *value : registry) {
+        callback(value->getName(), value->getValue());
+    }
+}

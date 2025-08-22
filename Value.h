@@ -74,11 +74,17 @@ public:
             return value.floatValue < other.value.floatValue;
         }
     }
-    inline String toString(int decimalPlaces = 6) const {
+    inline String toString(int decimalPlaces = -1) const {
         if (type == VT_Int) {
             return String(value.intValue);
         } else {
-            return String(value.floatValue, decimalPlaces);
+            char str[64];
+            if (decimalPlaces < 0) {
+                snprintf(str, sizeof(str), "%g", value.floatValue);
+            } else {
+                snprintf(str, sizeof(str), "%.*f", decimalPlaces, value.floatValue);
+            }
+            return String(str);
         }
     }
 };
