@@ -2,6 +2,8 @@
 
 #include <WiFi.h>
 #include <ESPmDNS.h>
+#include <FS.h>
+#include <SPIFFS.h>
 
 #include "Config.h"
 #include "OTA.h"
@@ -49,6 +51,11 @@ void setup() {
     otaSetup(hostName);
 
     Serial.println("================================");
+
+    if (!SPIFFS.begin(true)) {
+        Serial.println("SPIFFS Mount Failed");
+    }
+    configValuesLoad();
 
     Wire.begin();
     mpu.begin();

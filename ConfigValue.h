@@ -43,5 +43,6 @@ public:
     
 };
 
+void configValuesLoad();
 void configValuesIterate(const std::function<void(const String &, const Value &)> &callback);
 bool configValueSetString(const String &name, const String &valueString);

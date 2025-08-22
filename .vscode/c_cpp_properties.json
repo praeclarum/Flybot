@@ -9,6 +9,7 @@
                 "/Users/fak/Library/Arduino15/packages/esp32/hardware/esp32/3.2.1/libraries/ESPmDNS/src",
                 "/Users/fak/Library/Arduino15/packages/esp32/hardware/esp32/3.2.1/libraries/FS/src",
                 "/Users/fak/Library/Arduino15/packages/esp32/hardware/esp32/3.2.1/libraries/Network/src",
+                "/Users/fak/Library/Arduino15/packages/esp32/hardware/esp32/3.2.1/libraries/SPIFFS/src",
                 "/Users/fak/Library/Arduino15/packages/esp32/hardware/esp32/3.2.1/libraries/WiFi/src",
                 "/Users/fak/Library/Arduino15/packages/esp32/hardware/esp32/3.2.1/libraries/Wire/src",
                 "/Users/fak/Library/Arduino15/packages/esp32/hardware/esp32/3.2.1/variants/esp32",
