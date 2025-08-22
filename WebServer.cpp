@@ -234,6 +234,8 @@ void webServerBegin() {
                 + ",\"ry\":" + String(state.rcYaw, 3)
                 + ",\"rt\":" + String(state.rcThrottle, 3)
                 + ",\"a\":" + String(state.armed?"true":"false")
+                + ",\"ep\":" + String(state.pitchErrorRadians, 3)
+                + ",\"er\":" + String(state.rollErrorRadians, 3)
                 + ",\"m1\":" + String(state.motor1Command, 3)
                 + ",\"m2\":" + String(state.motor2Command, 3)
                 + ",\"m3\":" + String(state.motor3Command, 3)

@@ -8,6 +8,8 @@ let state = {
     rcRollDegrees: 0.0,
     rcPitchDegrees: 0.0,
     armed: false,
+    errorPitchDegrees: 0.0,
+    errorRollDegrees: 0.0,
     motor1Command: 0.0,
     motor2Command: 0.0,
     motor3Command: 0.0,
@@ -47,6 +49,8 @@ class FlySocket {
                 state.rcPitchDegrees = data.rp * rad2deg;
                 state.throttlePercent = data.rt * 100.0;
                 state.armed = data.a;
+                state.errorPitchDegrees = data.ep * rad2deg;
+                state.errorRollDegrees = data.er * rad2deg;
                 state.motor1Command = data.m1;
                 state.motor2Command = data.m2;
                 state.motor3Command = data.m3;
@@ -293,10 +297,12 @@ function drawHUD(ctx, x, y, width, height) {
 
     ctx.fillStyle = "#000000";
     ctx.font = "16px sans-serif";
-    ctx.fillText("Roll: " + state.rollDegrees.toFixed(1) + "°", 10, 60);
-    ctx.fillText("Throttle: " + state.throttlePercent.toFixed(1) + "%", 10, 80);
-    ctx.fillText("Armed: " + (state.armed ? "Yes" : "No"), 10, 100);
-    
+    ctx.fillText("Pitch: " + state.pitchDegrees.toFixed(1) + "°", 10, 60);
+    ctx.fillText("Roll: " + state.rollDegrees.toFixed(1) + "°", 10, 80);
+    ctx.fillText("Error Pitch: " + state.errorPitchDegrees.toFixed(1) + "°", 10, 100);
+    ctx.fillText("Error Roll: " + state.errorRollDegrees.toFixed(1) + "°", 10, 120);
+    ctx.fillText("Throttle: " + state.throttlePercent.toFixed(1) + "%", 10, 140);
+    ctx.fillText("Armed: " + (state.armed ? "Yes" : "No"), 10, 160);
 }
 
 function drawDrone(ctx, x, y, width, height) {

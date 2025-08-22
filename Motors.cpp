@@ -17,11 +17,13 @@ void MotorMixer::updateMotorMix() {
         if (std::abs(m->x.getFloat()) > maxX) maxX = std::abs(m->x.getFloat());
         if (std::abs(m->y.getFloat()) > maxY) maxY = std::abs(m->y.getFloat());
     }
+    if (maxX < 1.0f) maxX = 1.0f; // Prevent division by zero
+    if (maxY < 1.0f) maxY = 1.0f; // Prevent division by zero
     for (size_t i = 0; i < numMotors; ++i) {
         // [thrust, pitch, roll, yaw]
         mixerMatrix[i].thrust = 1.0f; // All motors contribute equally to thrust
-        mixerMatrix[i].pitch  = motors[i]->y.getFloat() / (maxY ? maxY : 1); // Pitch: y offset (rotation about X)
-        mixerMatrix[i].roll   = motors[i]->x.getFloat() / (maxX ? maxX : 1); // Roll: x offset (rotation about Y)
+        mixerMatrix[i].pitch  = motors[i]->y.getFloat() / maxY; // Pitch: y offset (rotation about X)
+        mixerMatrix[i].roll   = -motors[i]->x.getFloat() / maxX; // Roll: x offset (rotation about Y)
         mixerMatrix[i].yaw    = static_cast<float>(motors[i]->direction.getInt()); // Yaw: CW/CCW
     }
 }

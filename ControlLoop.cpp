@@ -21,9 +21,9 @@ static const float dDefaultLimit = 0.2f;
 static const float iDefaultLimit = 0.2f;
 static const float defaultLimit = 1.0f;
 
-PID pitchPID("pitchPID", 0.1f, 0.01f, 0.05f,
+PID pitchPID("pitchPID", 0.1f, 0.0f, 0.0f,
     dDefaultFilter, iDefaultLimit, dDefaultLimit, defaultLimit);
-PID rollPID("rollPID", 0.1f, 0.01f, 0.05f,
+PID rollPID("rollPID", 0.1f, 0.0f, 0.0f,
     dDefaultFilter, iDefaultLimit, dDefaultLimit, defaultLimit);
 MotorMixer motorMixer;
 
@@ -72,12 +72,13 @@ void controlLoop(MPU &mpu) {
     const State stateBeforeCommands = getState();
     const float pitchCommandRad = stateBeforeCommands.rcPitchRadians;
     const float rollCommandRad = stateBeforeCommands.rcRollRadians;
-    const auto qYaw = Quaternion::fromEulerAngles(Vector(0.0f, 0.0f, orientEuler.z));
+    const Quaternion qYaw;
     const auto qPitch = Quaternion::fromEulerAngles(Vector(pitchCommandRad, 0.0f, 0.0f));
     const auto qRoll = Quaternion::fromEulerAngles(Vector(0.0f, rollCommandRad, 0.0f));
     const auto qCmd = combineCommands(qYaw, qPitch, qRoll);
     const auto qError = getOrientationError(currentOrientation, qCmd);
     const Vector errorEuler = qError.toEulerAngles();
+    stateUpdateControlErrors(errorEuler.x, errorEuler.y);
 
     //
     // Compute PID outputs
