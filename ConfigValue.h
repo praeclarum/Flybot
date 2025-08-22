@@ -24,6 +24,7 @@ public:
         return value;
     }
     void setValue(const Value &newValue);
+    void setValueString(const String &newValueString);
     inline int32_t getInt() const {
         return value.getInt();
     }
@@ -36,9 +37,10 @@ public:
     inline bool isFloat() const {
         return value.isFloat();
     }
-    inline String toString(int decimalPlaces = 6) const {
+    inline String toString(int decimalPlaces = -1) const {
         return value.toString(decimalPlaces);
     }
+    
 };
 
 void configValuesIterate(const std::function<void(const String &, const Value &)> &callback);

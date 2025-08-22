@@ -87,4 +87,11 @@ public:
             return String(str);
         }
     }
+    inline void setToString(const String &str) {
+        if (type == VT_Int) {
+            value.intValue = str.toInt();
+        } else {
+            value.floatValue = str.toFloat();
+        }
+    }
 };

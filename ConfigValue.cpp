@@ -38,8 +38,13 @@ void ConfigValue::setValue(const Value &newValue) {
         ESP_LOGW("Config", "Attempt to set value of type %d, expected %d", newValue.getType(), defaultValue.getType());
         return;
     }
-    ESP_LOGI("Config", "Setting %s to %s", name.c_str(), newValue.toString().c_str());
     value = newValue;
+    ESP_LOGI("Config", "Config set %s = %s", name.c_str(), value.toString().c_str());
+}
+
+void ConfigValue::setValueString(const String &newValueString) {
+    value.setToString(newValueString);
+    ESP_LOGI("Config", "Config set %s = %s (from %s)", name.c_str(), value.toString().c_str(), newValueString.c_str());
 }
 
 void configValuesIterate(const std::function<void(const String &, const Value &)> &callback) {
@@ -50,8 +55,7 @@ void configValuesIterate(const std::function<void(const String &, const Value &)
 
 bool configValueSetString(const String &name, const String &valueString) {
     if (auto *value = findConfig(name)) {
-        Serial.printf("Setting config value %s to %s\n", name.c_str(), valueString.c_str());
-        // value->setValue(Value::fromString(valueString));
+        value->setValueString(valueString);
         return true;
     }
     return false;
