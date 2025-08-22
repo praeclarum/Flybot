@@ -144,7 +144,6 @@ static const char *htmlContent PROGMEM = R"(<!DOCTYPE html>
     <input type="text" id="command" placeholder="Send a command">
     <button onclick='sendCommand()'>Send</button>
     </div>
-    <!--<script type="text/javascript" src="script.js"></script>-->
     <script type="text/javascript" src="https://praeclarum.org/Flybot/flybot.js"></script>
     <script type="text/javascript">
         flybotStart("flybot.local");
@@ -153,6 +152,29 @@ static const char *htmlContent PROGMEM = R"(<!DOCTYPE html>
 </html>
 )";
 static const size_t htmlContentLength = strlen_P(htmlContent);
+
+static const char *configHtmlContent PROGMEM = R"(<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Config - Flybot</title>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+</head>
+<body>
+    <h1>Flybot</h1>
+    <div>
+        <h2>Configuration</h2>
+        <div id="config"></div>
+        <pre id="raw_config"></pre>
+    </div>
+    <script type="text/javascript" src="http://192.168.112.2/flybot.js"></script>
+    <script type="text/javascript">
+        flybotConfigStart();
+    </script>
+</body>
+</html>
+)";
+static const size_t configHtmlContentLength = strlen_P(configHtmlContent);
 
 void webServerBegin() {
     // requestLogger.setEnabled(true);
@@ -168,8 +190,11 @@ void webServerBegin() {
     server.on("/script.js", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(200, "application/javascript", (const uint8_t *)jsContent, jsContentLength);
     });
+    server.on("/config", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(200, "text/html", (const uint8_t *)configHtmlContent, configHtmlContentLength);
+    });
     server.on("/config.json", HTTP_GET, [](AsyncWebServerRequest *request) {
-        auto stream = request->beginResponseStream("application/json");
+        auto stream = request->beginResponseStream("application/json", 1200);
         stream->print("{");
         const char *head = "";
         configValuesIterate([&](const String &key, const Value &value) {
@@ -182,6 +207,12 @@ void webServerBegin() {
         });
         stream->print("}");
         request->send(stream);
+    });
+    server.on("/config_value", HTTP_POST, [](AsyncWebServerRequest *request) {
+        const auto key = request->arg("key");
+        const auto valueString = request->arg("value");
+        const auto success = configValueSetString(key, valueString);
+        request->send(200, "application/json", "{\"success\":" + String(success ? "true" : "false") + "}");
     });
     
     wsHandler.onConnect([](AsyncWebSocket *server, AsyncWebSocketClient *client) {

@@ -47,3 +47,12 @@ void configValuesIterate(const std::function<void(const String &, const Value &)
         callback(value->getName(), value->getValue());
     }
 }
+
+bool configValueSetString(const String &name, const String &valueString) {
+    if (auto *value = findConfig(name)) {
+        Serial.printf("Setting config value %s to %s\n", name.c_str(), valueString.c_str());
+        // value->setValue(Value::fromString(valueString));
+        return true;
+    }
+    return false;
+}

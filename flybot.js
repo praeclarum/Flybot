@@ -283,4 +283,90 @@ function flybotStart(root) {
     }, 1000/10);
 }
 
+//
+// CONFIG
+//
 
+let config = {
+    "numMotors": 0
+};
+const $motorUIs = {};
+
+function buildConfigUI() {
+    const $config = document.getElementById("config");
+    $config.innerHTML = `
+        <label for="numMotors">Num Motors:</label>
+        <input type="number" id="numMotors" min="1" max="6" value="${config.numMotors}" onchange="updateMotorConfig('numMotors', this.value)">
+    `;
+    for (let i = 1; i <= 6; i++) {
+        const $motorUI = buildMotorConfigUI(i);
+        $motorUIs[i] = $motorUI;
+        $config.appendChild($motorUI);
+    }
+    updateConfigUI();
+}
+
+function updateConfigUI() {
+    for (let i = 1; i <= 6; i++) {
+        const $motorUI = $motorUIs[i];
+        $motorUI.style.display = (i <= config.numMotors) ? "block" : "none";
+    }
+}
+
+function buildMotorConfigUI(motorId) {
+    const $motorUI = document.createElement("div");
+    const key = `motor${motorId}`;
+    $motorUI.classList.add("motor-config");
+    $motorUI.innerHTML = `
+        <div id="${key}-config">
+        <h3>Motor ${motorId}</h3>
+        <label for="${key}-x">X:</label>
+        <input type="number" id="${key}-x" value="${config[key+".x"]}" onchange="updateMotorConfig('${key}.x', this.value)">&nbsp;mm
+        <label for="${key}-y">Y:</label>
+        <input type="number" id="${key}-y" value="${config[key+".y"]}" onchange="updateMotorConfig('${key}.y', this.value)">&nbsp;mm
+        </div>
+    `;
+    return $motorUI;
+}
+
+function updateMotorConfig(key, value) {
+    config[key] = parseFloat(value);
+    console.log("Updating motor config", {key, value});
+    const urlParams = new URLSearchParams();
+    urlParams.append("key", key);
+    urlParams.append("value", value);
+    const url = "config_value?" + urlParams.toString();
+    fetch(url, {
+        method: "POST",
+        body: ""
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Network response was not ok");
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log("Config updated successfully:", data);
+        updateConfigUI();
+    })
+    .catch(error => {
+        console.error("Error updating config:", error);
+    });
+}
+
+
+function flybotConfigStart() {
+    fetch("config.json")
+    .then(response => response.json())
+    .then(data => {
+        console.log("Config data:", data);
+        config = data;
+        buildConfigUI();
+        // const configElement = document.getElementById("raw_config");
+        // configElement.textContent = JSON.stringify(data, null, 2);
+    })
+    .catch(error => {
+        console.error("Error fetching config.json:", error);
+    });
+}
