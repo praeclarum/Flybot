@@ -4,6 +4,7 @@
 #include "State.h"
 #include "PID.h"
 #include "Motors.h"
+#include "StateMachine.h"
 
 #define CONTROL_LOOP_HZ 100
 #define CONTROL_LOOP_INTERVAL_MICROS (1000000 / CONTROL_LOOP_HZ)
@@ -66,6 +67,11 @@ void controlLoop(MPU &mpu) {
     const Vector orientEuler = currentOrientation.toEulerAngles();
     
     stateUpdateOrientation(orientEuler.x, orientEuler.y, orientEuler.z);
+
+    //
+    // Run state machine
+    //
+    flightState.update();
 
     //
     // Read commands and compute errors
