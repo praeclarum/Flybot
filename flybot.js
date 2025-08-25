@@ -51,7 +51,8 @@ class FlySocket {
                 state.rcRollDegrees = data.rr * rad2deg;
                 state.rcPitchDegrees = data.rp * rad2deg;
                 state.throttlePercent = data.rt * 100.0;
-                state.armed = data.a;
+                state.flightStatus = data.fs;
+                state.hardwareFlags = data.hf;
                 state.errorPitchDegrees = data.ep * rad2deg;
                 state.errorRollDegrees = data.er * rad2deg;
                 state.motor1Command = data.m1;
@@ -305,7 +306,66 @@ function drawHUD(ctx, x, y, width, height) {
     ctx.fillText("Error Pitch: " + state.errorPitchDegrees.toFixed(1) + "°", 10, 100);
     ctx.fillText("Error Roll: " + state.errorRollDegrees.toFixed(1) + "°", 10, 120);
     ctx.fillText("Throttle: " + state.throttlePercent.toFixed(1) + "%", 10, 140);
-    ctx.fillText("Armed: " + (state.armed ? "Yes" : "No"), 10, 160);
+    ctx.fillText("Flight Status: " + flightStatusToString(state.flightStatus), 10, 160);
+    ctx.fillText("Hardware Flags: " + hardwareFlagsToString(state.hardwareFlags), 10, 180);
+    ctx.fillText("Error: " + getFlightErrorMessage(), 10, 200);
+}
+
+const FS_Disarmed = 0;
+const FS_Arming = 1;
+const FS_Landed = 2;
+const FS_Flying = 3;
+
+function flightStatusToString(status) {
+    switch (status) {
+        case FS_Disarmed:
+            return "Disarmed";
+        case FS_Arming:
+            return "Arming";
+        case FS_Landed:
+            return "Landed";
+        case FS_Flying:
+            return "Flying";
+        default:
+            return "Unknown";
+    }
+}
+
+const HF_MPU_OK = 1 << 0;
+const HF_RC_OK = 1 << 1;
+
+function hardwareFlagsToString(flags) {
+    let parts = [];
+    const report = (f, n) => {
+        if (flags & f) {
+            parts.push("+" + n);
+        }
+        else {
+            parts.push("-" + n);
+        }
+    };
+    report(HF_RC_OK, "RC");
+    report(HF_MPU_OK, "MPU");
+    return parts.join(", ");
+}
+
+function getFlightErrorMessage() {
+    const hf = state.hardwareFlags;
+    // Is there a hardware failure?
+    if (!(hf & HF_RC_OK)) {
+        return "NO RC Signal";
+    }
+    if (!(hf & HF_MPU_OK)) {
+        return "MPU Failure";
+    }
+    // Are we disarmed?
+    if (state.flightStatus === FS_Disarmed) {
+        return "Disarmed";
+    }
+    if (state.flightStatus === FS_Arming) {
+        return "Arming";
+    }
+    return "";
 }
 
 function drawDrone(ctx, x, y, width, height) {
