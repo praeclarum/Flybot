@@ -4,10 +4,9 @@
 class DisarmedState : public StateMachine {
 protected:
     void beginState() override {
-        // stateClearStatusFlag(SF_Armed);
+        stateSetStatusFlag(SF_Armed, false);
     }
     void updateState() override {
-        // DisarmedState specific update logic
     }
 public:
     DisarmedState() : StateMachine("Disarmed") {}
@@ -16,10 +15,9 @@ public:
 class FlyingState : public StateMachine {
 protected:
     void beginState() override {
-        // stateSetStatusFlag(SF_Armed);
+        stateSetStatusFlag(SF_Armed, true);
     }
     void updateState() override {
-        // DisarmedState specific update logic
     }
 public:
     FlyingState() : StateMachine("Flying") {}

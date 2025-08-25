@@ -140,7 +140,7 @@ static Quaternion madgwickUpdate(float deltat, const MPUData &data, const Quater
     return Quaternion(SEq_1, SEq_2, SEq_3, SEq_4);
 }
 
-void MPU::update()
+bool MPU::update()
 {
     const auto nowMicros = micros();
     if (updateCount == 0) {
@@ -148,11 +148,12 @@ void MPU::update()
     } else {
         MPUData data;
         if (!readCalibrated(data)) {
-            return;
+            return false;
         }
         const float dt = (nowMicros - lastUpdateMicros) * 1e-6f;
         orientation = madgwickUpdate(dt, data, orientation, 0.1f);
     }
     lastUpdateMicros = nowMicros;
     updateCount++;
+    return true;
 }

@@ -7,6 +7,7 @@ class StateMachine {
     String name;
     StateMachine *subState;
     StateMachine *nextState;
+    bool began;
 protected:
     virtual void beginState() = 0;
     virtual void updateState() = 0;
@@ -24,12 +25,20 @@ protected:
         }
     }
 public:
-    StateMachine(const String &name) : name(name), subState(nullptr), nextState(nullptr) {}
+    StateMachine(const String &name)
+        : name(name)
+        , subState(nullptr)
+        , nextState(nullptr)
+        , began(false) {}
     virtual ~StateMachine() {
         delete subState;
         delete nextState;
     }
     void update() {
+        if (!began) {
+            began = true;
+            beginState();
+        }
         if (subState) {
             subState->update();
             StateMachine *nextSubState = subState->nextState;

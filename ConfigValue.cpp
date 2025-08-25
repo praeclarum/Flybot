@@ -25,7 +25,7 @@ static void registerConfig(ConfigValue *value) {
         ESP_LOGE("Config", "Duplicate config name: %s", value->getName().c_str());
         return;
     }
-    ESP_LOGI("Config", "Registering config: %s = %s", value->getName().c_str(), value->getValue().toString().c_str());
+    ESP_LOGD("Config", "Registering config: %s = %s", value->getName().c_str(), value->getValue().toString().c_str());
     registry.push_back(value);
 }
 
@@ -33,7 +33,7 @@ ConfigValue::ConfigValue(const String &name, const String &descriptionHtml, Valu
     : name(name), descriptionHtml(descriptionHtml), defaultValue(defaultValue), value(defaultValue) {
     registerConfig(this);
     if (defaultValue.getType() != value.getType()) {
-        ESP_LOGW("Config", "Default value type %d does not match value type %d", defaultValue.getType(), value.getType());
+        ESP_LOGE("Config", "Default value type %d does not match value type %d", defaultValue.getType(), value.getType());
     }
 }
 
@@ -184,7 +184,7 @@ void configValuesLoad() {
                         ESP_LOGE("Config", "Unknown config key: %s", key.c_str());
                     }
                     else {
-                        ESP_LOGI("Config", "Loaded config: %s = %s", key.c_str(), valueString.c_str());
+                        ESP_LOGD("Config", "Loaded config: %s = %s", key.c_str(), valueString.c_str());
                         config->value.setToString(valueString);
                     }
                     state = (ch == ',') ? JS_NeedKey : JS_NeedObject;

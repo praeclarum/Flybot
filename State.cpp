@@ -6,10 +6,19 @@ const State &getState() {
     return currentState;
 }
 
-void stateUpdateOrientation(float pitchRadians, float rollRadians, float yawRadians) {
+void stateSetStatusFlag(StatusFlag flag, bool value) {
+    if (value) {
+        currentState.statusFlags |= flag;
+    } else {
+        currentState.statusFlags &= ~flag;
+    }
+}
+
+void stateUpdateOrientation(float pitchRadians, float rollRadians, float yawRadians, bool ok) {
     currentState.pitchRadians = pitchRadians;
     currentState.rollRadians = rollRadians;
     currentState.yawRadians = yawRadians;
+    stateSetStatusFlag(SF_MPU_OK, ok);
 }
 
 void stateUpdateRC(float pitch, float roll, float yaw, float throttle, bool ok) {
@@ -17,7 +26,7 @@ void stateUpdateRC(float pitch, float roll, float yaw, float throttle, bool ok) 
     currentState.rcRollRadians = roll;
     currentState.rcYaw = yaw;
     currentState.rcThrottle = throttle;
-    currentState.rcOK = ok;
+    stateSetStatusFlag(SF_RC_OK, ok);
 }
 
 void stateUpdateControlErrors(float pitchErrorRadians, float rollErrorRadians) {

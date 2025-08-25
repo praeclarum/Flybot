@@ -61,7 +61,7 @@ public:
     virtual ~MPU() {}
     virtual void begin() = 0;
 
-    void update();
+    bool update();
 
     Quaternion getOrientation() const {
         return orientation;

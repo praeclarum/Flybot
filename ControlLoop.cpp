@@ -61,12 +61,10 @@ void controlLoop(MPU &mpu) {
     else if (loopCounter == numCalCount) {
         mpu.endCalibration();
     }
-    mpu.update();
-
+    const bool mpuOk = mpu.update();
     const auto currentOrientation = mpu.getOrientation();
     const Vector orientEuler = currentOrientation.toEulerAngles();
-    
-    stateUpdateOrientation(orientEuler.x, orientEuler.y, orientEuler.z);
+    stateUpdateOrientation(orientEuler.x, orientEuler.y, orientEuler.z, mpuOk);
 
     //
     // Run state machine
@@ -74,7 +72,7 @@ void controlLoop(MPU &mpu) {
     flightState.update();
 
     //
-    // Read commands and compute errors
+    // Compute control errors
     //
     const State stateBeforeCommands = getState();
     const float pitchCommandRad = stateBeforeCommands.rcPitchRadians;
