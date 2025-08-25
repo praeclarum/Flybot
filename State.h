@@ -51,6 +51,12 @@ struct State {
     bool hasHardwareFlag(HardwareFlag flag) const {
         return (hardwareFlags & static_cast<std::uint32_t>(flag)) != 0;
     }
+    float rcPitchDegrees() const {
+        return rcPitchRadians * (180.0f / 3.14159265359f);
+    }
+    float rcRollDegrees() const {
+        return rcRollRadians * (180.0f / 3.14159265359f);
+    }
 };
 
 const State &getState();

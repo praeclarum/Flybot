@@ -14,6 +14,27 @@ static uint8_t packetLen = 0;
 ConfigValue rcPitchMaxDegrees("rc.pitch.max", "Maximum pitch angle (degrees)", Value::fromFloat(45.0f));
 ConfigValue rcRollMaxDegrees("rc.roll.max", "Maximum roll angle (degrees)", Value::fromFloat(45.0f));
 
+bool rcIsArming() {
+    const State &state = getState();
+    if (!state.hasHardwareFlag(HF_RC_OK)) {
+        return false;
+    }
+    // Serial.printf("T: %.3f, Y: %.3f, P: %.3f, R: %.3f\n", state.rcThrottle, state.rcYaw, state.rcPitchDegrees(), state.rcRollDegrees());
+    if (state.rcThrottle > 0.02f) {
+        return false;
+    }
+    if (state.rcYaw < 0.98f) {
+        return false;
+    }
+    if (abs(state.rcPitchDegrees() - rcPitchMaxDegrees.getFloat()) > 1.0f) {
+        return false;
+    }
+    if (abs(state.rcRollDegrees() + rcRollMaxDegrees.getFloat()) > 1.0f) {
+        return false;
+    }
+    return true;
+}
+
 static void parsePacket() {
     bool failSafe = (packet[23] & 0x08) != 0; // True when no RC signal
     bool hasSignal = !failSafe;
@@ -47,7 +68,7 @@ static void parsePacket() {
         //     hasSignal ? "true" : "false", ch1f, ch2f, ch3f, ch4f);
     }
     const float thr = ch3f;
-    const float yaw = ch4f;
+    const float yaw = (ch4f * 2.0f - 1.0f);
     const float pitchDegrees = (ch2f * 2.0f - 1.0f) * rcPitchMaxDegrees.getFloat();
     const float rollDegrees = (ch1f * 2.0f - 1.0f) * rcRollMaxDegrees.getFloat();
     stateUpdateRC(

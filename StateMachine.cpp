@@ -1,15 +1,27 @@
 #include "StateMachine.h"
 #include "State.h"
+#include "RadioController.h"
 
 class DisarmedState : public StateMachine {
 protected:
     void beginState() override {
         stateSetFlightStatus(FS_Disarmed);
     }
-    void updateState() override {
-    }
+    void updateState() override;
 public:
     DisarmedState() : StateMachine("Disarmed") {}
+};
+
+class ArmingState : public StateMachine {
+    unsigned long startMillis;
+protected:
+    void beginState() override {
+        stateSetFlightStatus(FS_Arming);
+        startMillis = millis();
+    }
+    void updateState() override;
+public:
+    ArmingState() : StateMachine("Arming"), startMillis(0) {}
 };
 
 class FlyingState : public StateMachine {
@@ -22,6 +34,25 @@ protected:
 public:
     FlyingState() : StateMachine("Flying") {}
 };
+
+void DisarmedState::updateState() {
+    const auto a = rcIsArming();
+    if (a) {
+        transitionState(new ArmingState());
+    }
+}
+
+void ArmingState::updateState() {
+    const auto a = rcIsArming();
+    if (a) {
+        if (millis() - startMillis > 3000) { // 3 seconds debounce
+            transitionState(new FlyingState());
+        }
+    }
+    else {
+        transitionState(new DisarmedState());
+    }
+}
 
 FlightState flightState;
 
