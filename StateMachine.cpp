@@ -4,7 +4,7 @@
 class DisarmedState : public StateMachine {
 protected:
     void beginState() override {
-        stateSetStatusFlag(SF_Armed, false);
+        stateSetFlightStatus(FS_Disarmed);
     }
     void updateState() override {
     }
@@ -15,7 +15,7 @@ public:
 class FlyingState : public StateMachine {
 protected:
     void beginState() override {
-        stateSetStatusFlag(SF_Armed, true);
+        stateSetFlightStatus(FS_Flying);
     }
     void updateState() override {
     }

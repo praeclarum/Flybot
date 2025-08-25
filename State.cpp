@@ -6,19 +6,23 @@ const State &getState() {
     return currentState;
 }
 
-void stateSetStatusFlag(StatusFlag flag, bool value) {
+void stateSetHardwareFlag(HardwareFlag flag, bool value) {
     if (value) {
-        currentState.statusFlags |= flag;
+        currentState.hardwareFlags |= flag;
     } else {
-        currentState.statusFlags &= ~flag;
+        currentState.hardwareFlags &= ~flag;
     }
+}
+
+void stateSetFlightStatus(FlightStatus status) {
+    currentState.flightStatus = status;
 }
 
 void stateUpdateOrientation(float pitchRadians, float rollRadians, float yawRadians, bool ok) {
     currentState.pitchRadians = pitchRadians;
     currentState.rollRadians = rollRadians;
     currentState.yawRadians = yawRadians;
-    stateSetStatusFlag(SF_MPU_OK, ok);
+    stateSetHardwareFlag(HF_MPU_OK, ok);
 }
 
 void stateUpdateRC(float pitch, float roll, float yaw, float throttle, bool ok) {
@@ -26,7 +30,7 @@ void stateUpdateRC(float pitch, float roll, float yaw, float throttle, bool ok) 
     currentState.rcRollRadians = roll;
     currentState.rcYaw = yaw;
     currentState.rcThrottle = throttle;
-    stateSetStatusFlag(SF_RC_OK, ok);
+    stateSetHardwareFlag(HF_RC_OK, ok);
 }
 
 void stateUpdateControlErrors(float pitchErrorRadians, float rollErrorRadians) {
