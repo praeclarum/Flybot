@@ -35,6 +35,27 @@ bool rcIsArming() {
     return true;
 }
 
+bool rcIsNoInput() {
+    const State &state = getState();
+    if (!state.hasHardwareFlag(HF_RC_OK)) {
+        return false;
+    }
+    // Serial.printf("T: %.3f, Y: %.3f, P: %.3f, R: %.3f\n", state.rcThrottle, state.rcYaw, state.rcPitchDegrees(), state.rcRollDegrees());
+    if (state.rcThrottle > 0.02f) {
+        return false;
+    }
+    if (abs(state.rcYaw) > 0.02f) {
+        return false;
+    }
+    if (abs(state.rcPitchDegrees()) > 1.0f) {
+        return false;
+    }
+    if (abs(state.rcRollDegrees()) > 1.0f) {
+        return false;
+    }
+    return true;
+}
+
 static void parsePacket() {
     bool failSafe = (packet[23] & 0x08) != 0; // True when no RC signal
     bool hasSignal = !failSafe;

@@ -24,6 +24,18 @@ public:
     ArmingState() : StateMachine("Arming"), startMillis(0) {}
 };
 
+class WaitingForNoInputState : public StateMachine {
+    unsigned long startMillis;
+protected:
+    void beginState() override {
+        stateSetFlightStatus(FS_WaitingForNoInput);
+        startMillis = millis();
+    }
+    void updateState() override;
+public:
+    WaitingForNoInputState() : StateMachine("WaitingForNoInput"), startMillis(0) {}
+};
+
 class FlyingState : public StateMachine {
 protected:
     void beginState() override {
@@ -43,14 +55,26 @@ void DisarmedState::updateState() {
 }
 
 void ArmingState::updateState() {
-    const auto a = rcIsArming();
-    if (a) {
+    const auto arming = rcIsArming();
+    if (arming) {
         if (millis() - startMillis > 3000) { // 3 seconds debounce
-            transitionState(new FlyingState());
+            transitionState(new WaitingForNoInputState());
         }
     }
     else {
         transitionState(new DisarmedState());
+    }
+}
+
+void WaitingForNoInputState::updateState() {
+    const auto noInput = rcIsNoInput();
+    if (noInput) {
+        transitionState(new FlyingState());
+    }
+    else {
+        if (millis() - startMillis > 3000) {
+            transitionState(new DisarmedState());
+        }
     }
 }
 

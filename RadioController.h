@@ -6,3 +6,4 @@ void rcBegin();
 void rcUpdate();
 
 bool rcIsArming();
+bool rcIsNoInput();
