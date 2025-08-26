@@ -10,6 +10,8 @@
 #include "Config.h" // For MotorConfig
 #include "State.h"
 
+static const uint32_t pwmFrequency = 50;
+
 void MotorMixer::updateMotorMix() {
     const auto motors = airframeConfig.getMotorConfigs();
     numMotors = motors.size();
@@ -53,8 +55,6 @@ void MotorMixer::mix(const MixValues& mixValues) {
     }
 }
 
-static const uint32_t pwmFrequency = 100;
-
 static void hwSetSpeed(uint8_t pin, float speed, bool print) {
     // Speed is 0.0 to 1.0
     if (speed < 0.0f) speed = 0.0f;
@@ -75,11 +75,8 @@ static void hwSetSpeed(uint8_t pin, float speed, bool print) {
 static void initMotorPin(uint8_t pin, uint8_t channel) {
     digitalWrite(pin, 0);
     pinMode(pin, OUTPUT);
-    ledcWrite(pin, 0);
     ledcAttachChannel(pin, pwmFrequency, 12, channel);
-    ledcWrite(pin, 0);
-    ledcChangeFrequency(pin, pwmFrequency, 12);
-    ledcWrite(pin, 0);
+    hwSetSpeed(pin, 0.0f, true);
 }
 
 void motorsSetup() {

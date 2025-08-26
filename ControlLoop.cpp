@@ -118,6 +118,15 @@ void controlLoop(MPU &mpu) {
             motorMixer.getMotorCommand(4),
             motorMixer.getMotorCommand(5));
     }
+    else {
+        motorsSendCommands(
+            0.0f,
+            0.0f,
+            0.0f,
+            0.0f,
+            0.0f,
+            0.0f);
+    }
 
     loopCounter++;
 }
