@@ -16,11 +16,13 @@ struct MixValues {
 class MotorMixer {
 private:
     size_t numMotors;
+    float minimumCommand;
     MixValues mixerMatrix[MAX_MOTORS];
     float outputs[MAX_MOTORS];
 public:
     MotorMixer()
-        : numMotors(0) {
+        : numMotors(0)
+        , minimumCommand(0.0f) {
         std::memset(mixerMatrix, 0, sizeof(mixerMatrix));
         std::memset(outputs, 0, sizeof(outputs));
     }

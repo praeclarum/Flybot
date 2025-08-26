@@ -41,7 +41,7 @@ void MotorMixer::mix(const MixValues& mixValues) {
         newOutput += mixerMatrix[i].pitch  * mixValues.pitch;
         newOutput += mixerMatrix[i].roll   * mixValues.roll;
         newOutput += mixerMatrix[i].yaw    * mixValues.yaw;
-        if (newOutput < 0.0f) newOutput = 0.0f;
+        if (newOutput < minimumCommand) newOutput = minimumCommand;
         if (newOutput > maxOut) maxOut = newOutput;
         outputs[i] = newOutput;
     }
