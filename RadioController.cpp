@@ -14,6 +14,9 @@ static uint8_t packetLen = 0;
 ConfigValue rcPitchMaxDegrees("rc.pitch.max", "Maximum pitch angle (degrees)", Value::fromFloat(45.0f));
 ConfigValue rcRollMaxDegrees("rc.roll.max", "Maximum roll angle (degrees)", Value::fromFloat(45.0f));
 
+static bool didReceiveData = false;
+static float initialThrottle = 0.0f;
+
 bool rcIsArming() {
     const State &state = getState();
     if (!state.hasHardwareFlag(HF_RC_OK)) {
@@ -56,6 +59,13 @@ bool rcIsNoInput() {
     return true;
 }
 
+bool rcDidReceiveData() {
+    return didReceiveData;
+}
+float rcGetInitialThrottle() {
+    return initialThrottle;
+}
+
 static void parsePacket() {
     bool failSafe = (packet[23] & 0x08) != 0; // True when no RC signal
     bool hasSignal = !failSafe;
@@ -92,6 +102,11 @@ static void parsePacket() {
     const float yaw = (ch4f * 2.0f - 1.0f);
     const float pitchDegrees = (ch2f * 2.0f - 1.0f) * rcPitchMaxDegrees.getFloat();
     const float rollDegrees = (ch1f * 2.0f - 1.0f) * rcRollMaxDegrees.getFloat();
+    if (hasSignal && !didReceiveData) {
+        didReceiveData = true;
+        initialThrottle = thr;
+        ESP_LOGI("RadioController", "Received first RC data: initial throttle = %.3f", initialThrottle);
+    }
     stateUpdateRC(
         pitchDegrees * DEG_TO_RAD_F,
         rollDegrees * DEG_TO_RAD_F,

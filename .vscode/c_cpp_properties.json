@@ -6,6 +6,7 @@
                 "${workspaceFolder}/**",
                 "/Users/fak/Documents/Arduino/libraries/ESP_Async_WebServer/src",
                 "/Users/fak/Library/Arduino15/packages/esp32/hardware/esp32/3.2.1/cores/esp32",
+                "/Users/fak/Library/Arduino15/packages/esp32/hardware/esp32/3.2.1/libraries/EEPROM/src",
                 "/Users/fak/Library/Arduino15/packages/esp32/hardware/esp32/3.2.1/libraries/ESPmDNS/src",
                 "/Users/fak/Library/Arduino15/packages/esp32/hardware/esp32/3.2.1/libraries/FS/src",
                 "/Users/fak/Library/Arduino15/packages/esp32/hardware/esp32/3.2.1/libraries/Network/src",

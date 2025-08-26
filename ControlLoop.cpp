@@ -71,44 +71,53 @@ void controlLoop(MPU &mpu) {
     //
     flightState.update();
 
-    //
-    // Compute control errors
-    //
     const State stateBeforeCommands = getState();
-    const float pitchCommandRad = stateBeforeCommands.rcPitchRadians;
-    const float rollCommandRad = stateBeforeCommands.rcRollRadians;
-    const Quaternion qYaw;
-    const auto qPitch = Quaternion::fromEulerAngles(Vector(pitchCommandRad, 0.0f, 0.0f));
-    const auto qRoll = Quaternion::fromEulerAngles(Vector(0.0f, rollCommandRad, 0.0f));
-    const auto qCmd = combineCommands(qYaw, qPitch, qRoll);
-    const auto qError = getOrientationError(currentOrientation, qCmd);
-    const Vector errorEuler = qError.toEulerAngles();
-    stateUpdateControlErrors(errorEuler.x, errorEuler.y);
+    if (stateBeforeCommands.flightStatus == FS_Flying) {
+        //
+        // Compute control errors
+        //
+        const float pitchCommandRad = stateBeforeCommands.rcPitchRadians;
+        const float rollCommandRad = stateBeforeCommands.rcRollRadians;
+        const Quaternion qYaw;
+        const auto qPitch = Quaternion::fromEulerAngles(Vector(pitchCommandRad, 0.0f, 0.0f));
+        const auto qRoll = Quaternion::fromEulerAngles(Vector(0.0f, rollCommandRad, 0.0f));
+        const auto qCmd = combineCommands(qYaw, qPitch, qRoll);
+        const auto qError = getOrientationError(currentOrientation, qCmd);
+        const Vector errorEuler = qError.toEulerAngles();
+        stateUpdateControlErrors(errorEuler.x, errorEuler.y);
 
-    //
-    // Compute PID outputs
-    //
-    // Serial.printf("%.3f,%.3f,%.3f\n", orientEuler.x * rad2deg, pitchCommandDeg, errorEuler.x * rad2deg);
-    const float pitchOutput = pitchPID.updateError(errorEuler.x);
-    const float rollOutput = rollPID.updateError(errorEuler.y);
+        //
+        // Compute PID outputs
+        //
+        // Serial.printf("%.3f,%.3f,%.3f\n", orientEuler.x * rad2deg, pitchCommandDeg, errorEuler.x * rad2deg);
+        const float pitchOutput = pitchPID.updateError(errorEuler.x);
+        const float rollOutput = rollPID.updateError(errorEuler.y);
 
-    //
-    // Mix outputs into motor commands
-    //
-    motorMixer.updateMotorMix();
-    MixValues mixValues;
-    mixValues.thrust = stateBeforeCommands.rcThrottle;
-    mixValues.pitch = pitchOutput;
-    mixValues.roll = rollOutput;
-    mixValues.yaw = stateBeforeCommands.rcYaw;
-    motorMixer.mix(mixValues);
-    stateUpdateMotorCommands(
-        motorMixer.getMotorCommand(0),
-        motorMixer.getMotorCommand(1),
-        motorMixer.getMotorCommand(2),
-        motorMixer.getMotorCommand(3),
-        motorMixer.getMotorCommand(4),
-        motorMixer.getMotorCommand(5));
+        //
+        // Mix outputs into motor commands
+        //
+        motorMixer.updateMotorMix();
+        MixValues mixValues;
+        mixValues.thrust = stateBeforeCommands.rcThrottle;
+        mixValues.pitch = pitchOutput;
+        mixValues.roll = rollOutput;
+        mixValues.yaw = stateBeforeCommands.rcYaw;
+        motorMixer.mix(mixValues);
+        // motorsSendCommands(
+        //     stateBeforeCommands.rcThrottle,
+        //     stateBeforeCommands.rcThrottle,
+        //     stateBeforeCommands.rcThrottle,
+        //     stateBeforeCommands.rcThrottle,
+        //     stateBeforeCommands.rcThrottle,
+        //     stateBeforeCommands.rcThrottle);
+        motorsSendCommands(
+            motorMixer.getMotorCommand(0),
+            motorMixer.getMotorCommand(1),
+            motorMixer.getMotorCommand(2),
+            motorMixer.getMotorCommand(3),
+            motorMixer.getMotorCommand(4),
+            motorMixer.getMotorCommand(5));
+    }
 
     loopCounter++;
 }
