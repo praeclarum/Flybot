@@ -22,7 +22,7 @@ private:
 public:
     MotorMixer()
         : numMotors(0)
-        , minimumCommand(0.075f) {
+        , minimumCommand(0.07f) {
         std::memset(mixerMatrix, 0, sizeof(mixerMatrix));
         std::memset(outputs, 0, sizeof(outputs));
     }
