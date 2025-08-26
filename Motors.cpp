@@ -24,11 +24,10 @@ void MotorMixer::updateMotorMix() {
     if (maxX < 1.0f) maxX = 1.0f; // Prevent division by zero
     if (maxY < 1.0f) maxY = 1.0f; // Prevent division by zero
     for (size_t i = 0; i < numMotors; ++i) {
-        reversed[i] = motors[i]->direction.getInt() < 0;
         mixerMatrix[i].thrust = 1.0f; // All motors contribute equally to thrust
         mixerMatrix[i].pitch  = motors[i]->y.getFloat() / maxY; // Pitch: y offset (rotation about X)
         mixerMatrix[i].roll   = -motors[i]->x.getFloat() / maxX; // Roll: x offset (rotation about Y)
-        mixerMatrix[i].yaw    = reversed[i] ? -1.0f : 1.0f; // Yaw: motor direction
+        mixerMatrix[i].yaw    = motors[i]->direction.getInt() < 0 ? -1.0f : 1.0f; // Yaw: motor direction
     }
 }
 
