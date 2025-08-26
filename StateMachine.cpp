@@ -24,16 +24,16 @@ public:
     ArmingState() : StateMachine("Arming"), startMillis(0) {}
 };
 
-class WaitingForNoInputState : public StateMachine {
+class ArmingWaitingForNoInputState : public StateMachine {
     unsigned long startMillis;
 protected:
     void beginState() override {
-        stateSetFlightStatus(FS_WaitingForNoInput);
+        stateSetFlightStatus(FS_ArmingWaitingForNoInput);
         startMillis = millis();
     }
     void updateState() override;
 public:
-    WaitingForNoInputState() : StateMachine("WaitingForNoInput"), startMillis(0) {}
+    ArmingWaitingForNoInputState() : StateMachine("ArmingWaitingForNoInput"), startMillis(0) {}
 };
 
 class FlyingState : public StateMachine {
@@ -41,10 +41,33 @@ protected:
     void beginState() override {
         stateSetFlightStatus(FS_Flying);
     }
-    void updateState() override {
-    }
+    void updateState() override;
 public:
     FlyingState() : StateMachine("Flying") {}
+};
+
+class DisarmingState : public StateMachine {
+    unsigned long startMillis;
+protected:
+    void beginState() override {
+        stateSetFlightStatus(FS_Disarming);
+        startMillis = millis();
+    }
+    void updateState() override;
+public:
+    DisarmingState() : StateMachine("Disarming") {}
+};
+
+class DisarmingWaitingForNoInputState : public StateMachine {
+    unsigned long startMillis;
+protected:
+    void beginState() override {
+        stateSetFlightStatus(FS_DisarmingWaitingForNoInput);
+        startMillis = millis();
+    }
+    void updateState() override;
+public:
+    DisarmingWaitingForNoInputState() : StateMachine("DisarmingWaitingForNoInput"), startMillis(0) {}
 };
 
 void DisarmedState::updateState() {
@@ -57,8 +80,8 @@ void DisarmedState::updateState() {
 void ArmingState::updateState() {
     const auto arming = rcIsArming();
     if (arming) {
-        if (millis() - startMillis > 3000) { // 3 seconds debounce
-            transitionState(new WaitingForNoInputState());
+        if (millis() - startMillis > 2000) { // 2 seconds debounce
+            transitionState(new ArmingWaitingForNoInputState());
         }
     }
     else {
@@ -66,15 +89,36 @@ void ArmingState::updateState() {
     }
 }
 
-void WaitingForNoInputState::updateState() {
+void ArmingWaitingForNoInputState::updateState() {
     const auto noInput = rcIsNoInput();
     if (noInput) {
         transitionState(new FlyingState());
     }
-    else {
-        if (millis() - startMillis > 3000) {
-            transitionState(new DisarmedState());
+}
+
+void FlyingState::updateState() {
+    const auto arming = rcIsArming();
+    if (arming) {
+        transitionState(new DisarmingState());
+    }
+}
+
+void DisarmingState::updateState() {
+    const auto arming = rcIsArming();
+    if (arming) {
+        if (millis() - startMillis > 2000) { // 2 seconds debounce
+            transitionState(new DisarmingWaitingForNoInputState());
         }
+    }
+    else {
+        transitionState(new FlyingState());
+    }
+}
+
+void DisarmingWaitingForNoInputState::updateState() {
+    const auto noInput = rcIsNoInput();
+    if (noInput) {
+        transitionState(new DisarmedState());
     }
 }
 

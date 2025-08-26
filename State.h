@@ -3,10 +3,12 @@
 #include <cstdint>
 
 enum FlightStatus {
-    FS_Disarmed             = 0,
-    FS_Arming               = 1,
-    FS_WaitingForNoInput    = 2,
-    FS_Flying               = 3,
+    FS_Disarmed                     = 0,
+    FS_Arming                       = 1,
+    FS_ArmingWaitingForNoInput      = 2,
+    FS_Flying                       = 3,
+    FS_Disarming                    = 4,
+    FS_DisarmingWaitingForNoInput   = 5,
 };
 
 enum HardwareFlag {

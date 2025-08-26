@@ -72,7 +72,9 @@ void controlLoop(MPU &mpu) {
     flightState.update();
 
     const State stateBeforeCommands = getState();
-    if (stateBeforeCommands.flightStatus == FS_Flying) {
+    if (stateBeforeCommands.flightStatus == FS_Flying
+        || stateBeforeCommands.flightStatus == FS_Disarming
+        || stateBeforeCommands.flightStatus == FS_ArmingWaitingForNoInput) {
         //
         // Compute control errors
         //
@@ -103,13 +105,6 @@ void controlLoop(MPU &mpu) {
         mixValues.roll = rollOutput;
         mixValues.yaw = stateBeforeCommands.rcYaw;
         motorMixer.mix(mixValues);
-        // motorsSendCommands(
-        //     stateBeforeCommands.rcThrottle,
-        //     stateBeforeCommands.rcThrottle,
-        //     stateBeforeCommands.rcThrottle,
-        //     stateBeforeCommands.rcThrottle,
-        //     stateBeforeCommands.rcThrottle,
-        //     stateBeforeCommands.rcThrottle);
         motorsSendCommands(
             motorMixer.getMotorCommand(0),
             motorMixer.getMotorCommand(1),

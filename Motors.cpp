@@ -32,24 +32,31 @@ void MotorMixer::updateMotorMix() {
 }
 
 // Inputs: ControlInput (thrust, pitch, roll, yaw) in normalized units
-// Output: per-motor PWM in [-1, +1]
+// Output: per-motor PWM in [0, +1]
 void MotorMixer::mix(const MixValues& mixValues) {
     float maxOut = 0.0f;
-    for (size_t i = 0; i < numMotors; ++i) {
-        float newOutput = 0.0f;
-        newOutput += mixerMatrix[i].thrust * mixValues.thrust;
-        newOutput += mixerMatrix[i].pitch  * mixValues.pitch;
-        newOutput += mixerMatrix[i].roll   * mixValues.roll;
-        newOutput += mixerMatrix[i].yaw    * mixValues.yaw;
-        if (newOutput < minimumCommand) newOutput = minimumCommand;
-        if (newOutput > maxOut) maxOut = newOutput;
-        outputs[i] = newOutput;
-    }
-    if (maxOut > 1.0f) {
-        const float invMax = 1.0f / maxOut;
-        // Normalize outputs to [-1, +1]
+    if (mixValues.thrust > minimumCommand) {
         for (size_t i = 0; i < numMotors; ++i) {
-            outputs[i] *= invMax;
+            float newOutput = 0.0f;
+            newOutput += mixerMatrix[i].thrust * mixValues.thrust;
+            newOutput += mixerMatrix[i].pitch  * mixValues.pitch;
+            newOutput += mixerMatrix[i].roll   * mixValues.roll;
+            newOutput += mixerMatrix[i].yaw    * mixValues.yaw;
+            if (newOutput < minimumCommand) newOutput = minimumCommand;
+            if (newOutput > maxOut) maxOut = newOutput;
+            outputs[i] = newOutput;
+        }
+        if (maxOut > 1.0f) {
+            const float invMax = 1.0f / maxOut;
+            // Normalize outputs to [0, +1]
+            for (size_t i = 0; i < numMotors; ++i) {
+                outputs[i] *= invMax;
+            }
+        }
+    }
+    else {
+        for (size_t i = 0; i < numMotors; ++i) {
+            outputs[i] = minimumCommand;
         }
     }
 }
@@ -92,22 +99,12 @@ static unsigned long lastPrintMillis = 0;
 void motorsSendCommands(float motor1, float motor2, float motor3, float motor4, float motor5, float motor6) {
     const auto now = millis();
     bool shouldPrint = false;
-    if (now - lastPrintMillis > 1000) {
-        lastPrintMillis = now;
-        shouldPrint = true;
-    }
 
-    // motor1 = -1.0f;
-    // motor2 = motor1;
-    // motor3 = motor1;
-    // motor4 = motor1;
-    // motor5 = motor1;
-    // motor6 = motor1;
     hwSetSpeed(2, motor1, shouldPrint);
     hwSetSpeed(4, motor2, shouldPrint);
     hwSetSpeed(12, motor3, shouldPrint);
     hwSetSpeed(13, motor4, shouldPrint);
-    hwSetSpeed(14, motor5, false);
-    hwSetSpeed(15, motor6, false);
+    hwSetSpeed(14, motor5, shouldPrint);
+    hwSetSpeed(15, motor6, shouldPrint);
     stateUpdateMotorCommands(motor1, motor2, motor3, motor4, motor5, motor6);
 }

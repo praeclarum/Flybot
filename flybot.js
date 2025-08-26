@@ -313,8 +313,10 @@ function drawHUD(ctx, x, y, width, height) {
 
 const FS_Disarmed = 0;
 const FS_Arming = 1;
-const FS_WaitingForNoInput = 2;
+const FS_ArmingWaitingForNoInput = 2;
 const FS_Flying = 3;
+const FS_Disarming = 4;
+const FS_DisarmingWaitingForNoInput = 5;
 
 function flightStatusToString(status) {
     switch (status) {
@@ -322,10 +324,14 @@ function flightStatusToString(status) {
             return "Disarmed";
         case FS_Arming:
             return "Arming";
-        case FS_WaitingForNoInput:
-            return "WaitingForNoInput";
+        case FS_ArmingWaitingForNoInput:
+            return "ArmingWaitingForNoInput";
         case FS_Flying:
             return "Flying";
+        case FS_Disarming:
+            return "Disarming";
+        case FS_DisarmingWaitingForNoInput:
+            return "DisarmingWaitingForNoInput";
         default:
             return "Unknown";
     }
@@ -365,8 +371,14 @@ function getFlightErrorMessage() {
     if (state.flightStatus === FS_Arming) {
         return "Arming";
     }
-    if (state.flightStatus === FS_WaitingForNoInput) {
-        return "Premature Input";
+    if (state.flightStatus === FS_ArmingWaitingForNoInput) {
+        return "Arming Safety";
+    }
+    if (state.flightStatus === FS_Disarming) {
+        return "Disarming";
+    }
+    if (state.flightStatus === FS_DisarmingWaitingForNoInput) {
+        return "Disarming Safety";
     }
     return "";
 }
