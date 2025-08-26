@@ -140,10 +140,10 @@ static const char *htmlContent PROGMEM = R"(<!DOCTYPE html>
     <div>
         <canvas id="hud"></canvas>
     </div>
-    <div>
+    <!--<div>
     <input type="text" id="command" placeholder="Send a command">
     <button onclick='sendCommand()'>Send</button>
-    </div>
+    </div>-->
     <script type="text/javascript" src="http://192.168.112.2/flybot.js"></script>
     <script type="text/javascript">
         flybotStart("flybot.local");
