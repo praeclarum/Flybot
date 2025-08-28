@@ -9,8 +9,9 @@
 
 using namespace std;
 
+void mpuBeginCalibration();
+
 static AsyncWebServer server(80);
-// static AsyncLoggingMiddleware requestLogger;
 static AsyncWebSocketMessageHandler wsHandler;
 static AsyncWebSocket ws("/ws", wsHandler.eventHandler());
 
@@ -234,7 +235,11 @@ void webServerBegin() {
         const auto success = configValueRestore(key);
         request->send(200, "application/json", "{\"success\":" + String(success ? "true" : "false") + "}");
     });
-    
+    server.on("/mpu_calibrate", HTTP_POST, [](AsyncWebServerRequest *request) {
+        mpuBeginCalibration();
+        request->send(200, "application/json", "{\"success\":true}");
+    });
+
     wsHandler.onConnect([](AsyncWebSocket *server, AsyncWebSocketClient *client) {
         server->text(client->id(), "{\"type\":\"hello\"}");
     });

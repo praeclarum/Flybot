@@ -483,7 +483,31 @@ function buildConfigUI() {
         $motorUIs[i] = $motorUI;
         $config.appendChild($motorUI);
     }
+    const $cal = document.createElement("div");
+    $cal.innerHTML = `
+        <h3>Calibration</h3>
+        <button onclick="mpuBeginCalibration()">Begin MPU Calibration</button>
+    `;
+    $config.appendChild($cal);
     updateConfigUI();
+}
+
+function mpuBeginCalibration() {
+    fetch("mpu_calibrate", {
+        method: "POST"
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Network response was not ok");
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log("MPU calibration started:", data);
+    })
+    .catch(error => {
+        console.error("Error starting MPU calibration:", error);
+    });
 }
 
 function drawConfig() {

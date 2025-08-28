@@ -16,8 +16,6 @@ static const float piOver2 = 1.5707963267948966192313216916398f;
 static unsigned long nextControlLoopMicros = 0;
 static int loopCounter = 0;
 
-const int numCalCount = 300;
-
 static const float dDefaultFilter = 0.1f;
 static const float dDefaultLimit = 0.2f;
 static const float iDefaultLimit = 0.2f;
@@ -55,12 +53,6 @@ void controlLoop(MPU &mpu) {
     //
     // Read sensor data
     //
-    if (loopCounter == 0) {
-        mpu.beginCalibration();
-    }
-    else if (loopCounter == numCalCount) {
-        mpu.endCalibration();
-    }
     const bool mpuOk = mpu.update();
     const auto currentOrientation = mpu.getOrientation();
     const Vector orientEuler = currentOrientation.toEulerAngles();

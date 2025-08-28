@@ -43,15 +43,12 @@ class MPU {
     LinearCal gyroYCal;
     LinearCal gyroZCal;
 
-    bool isCalibrating;
-    uint32_t calCount;
-    MPUData calData;
-
     Quaternion orientation;
     
     uint32_t updateCount;
     unsigned long lastUpdateMicros;
     bool readCalibrated(MPUData &data);
+    void endCalibration();
 
 protected:
     virtual bool readUncalibrated(MPUData &data) = 0;
@@ -67,6 +64,6 @@ public:
         return orientation;
     }
 
-    void beginCalibration();
-    void endCalibration();
 };
+
+void mpuBeginCalibration();

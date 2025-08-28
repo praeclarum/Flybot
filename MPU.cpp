@@ -1,5 +1,11 @@
 #include "MPU.h"
 
+static bool isCalibrating = false;
+static uint32_t calCount = 0;
+static MPUData calData;
+static const uint32_t numCalCount = 300;
+
+
 MPU::MPU()
     : accelXCal("MPU.accelX", "Accelerometer X calibration")
     , accelYCal("MPU.accelY", "Accelerometer Y calibration")
@@ -7,7 +13,6 @@ MPU::MPU()
     , gyroXCal("MPU.gyroX", "Gyro X calibration")
     , gyroYCal("MPU.gyroY", "Gyro Y calibration")
     , gyroZCal("MPU.gyroZ", "Gyro Z calibration")
-    , calCount(0)
 {
 }
 
@@ -24,6 +29,9 @@ bool MPU::readCalibrated(MPUData &data)
         calData.gyroY += data.gyroY;
         calData.gyroZ += data.gyroZ;
         calCount++;
+        if (calCount >= numCalCount) {
+            endCalibration();
+        }
     }
     data.accelX = accelXCal.apply(data.accelX);
     data.accelY = accelYCal.apply(data.accelY);
@@ -32,13 +40,6 @@ bool MPU::readCalibrated(MPUData &data)
     data.gyroY = gyroYCal.apply(data.gyroY);
     data.gyroZ = gyroZCal.apply(data.gyroZ);
     return true;
-}
-
-void MPU::beginCalibration()
-{
-    isCalibrating = true;
-    calData = MPUData();
-    calCount = 0;
 }
 
 void MPU::endCalibration()
@@ -156,4 +157,10 @@ bool MPU::update()
     lastUpdateMicros = nowMicros;
     updateCount++;
     return true;
+}
+
+void mpuBeginCalibration() {
+    calCount = 0;
+    calData = MPUData();
+    isCalibrating = true;
 }
