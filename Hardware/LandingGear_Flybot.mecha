@@ -1,0 +1,32 @@
+// 
+hole_width = 12;
+// 
+hole_length = 11;
+// 
+hole_height = 2.8;
+// 
+arm_width = 22.2;
+// 
+gear_height = 30;
+_m_config(l="mm", m="g", up="Z");
+union() {
+    translate([0, 0, hole_height / 2 - 0.1])
+    cube(size=[hole_width - 0.5, hole_length - 0.5, hole_height], center=true);
+    difference() {
+        translate([0, 0, -gear_height / 2])
+        cube(size=[arm_width, arm_width * 1.5, gear_height], center=true);
+        translate([0, 0, -4.6])
+        cube(size=[arm_width * 2, 5, 4], center=true);
+        translate([-50 - hole_width / 2 + 0.5, 0, 0])
+        cube(size=[100, hole_length * 4, 100], center=true);
+        translate([0, 0, -4])
+        union() {
+            translate([0, -50, -gear_height / 2])
+            cube(size=[arm_width, 100, gear_height], center=true);
+            translate([0, 0, -gear_height])
+            rotate([90, 90, 0])
+            scale([0.5, 1, 1])
+            cylinder(h=arm_width, r1=gear_height, r2=gear_height, center=true, $fa=3, $fs=0.5);
+        }
+    }
+}
